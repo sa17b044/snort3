@@ -5,6 +5,7 @@
 #ifndef KNXNETIP_H
 #define KNXNETIP_H
 
+#include <cstdint>
 #include "flow/flow.h"
 #include "framework/counts.h"
 
@@ -23,18 +24,24 @@ struct KNXnetIPData
     uint32_t state;
 };
 
-class KNXnetIPFlowData : public FlowData
+class KNXnetIPFlowData : public snort::FlowData
 {
 public:
     KNXnetIPFlowData();
     ~KNXnetIPFlowData() override;
 
-    static void init()
-    { inspector_id = FlowData::create_flow_data_id(); }
+    static void init();
+//    { inspector_id = snort::FlowData::create_flow_data_id(); }
 
-public:
+    void reset()
+    {
+    	session.state = 0;
+    }
+
+private:
     static unsigned inspector_id;
     KNXnetIPData session;
+
 };
 
 //int get_message_type(int version, const char* name);

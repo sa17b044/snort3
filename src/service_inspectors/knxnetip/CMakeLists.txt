@@ -6,7 +6,7 @@ set( FILE_LIST
 )
 
 if (STATIC_INSPECTORS)
-    add_library(knxnetip STATIC ${FILE_LIST})
+    add_library(knxnetip OBJECT ${FILE_LIST})
 
 else (STATIC_INSPECTORS)
     add_dynamic_module(knxnetip inspectors ${FILE_LIST})

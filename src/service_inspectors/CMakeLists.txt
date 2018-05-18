@@ -19,18 +19,18 @@ add_subdirectory(ssl)
 add_subdirectory(wizard)
 
 if (STATIC_INSPECTORS)
-    set (STATIC_INSPECTOR_LIBS
-        back_orifice
-        dce_rpc
-        dnp3
-        dns
-        ftp_telnet
-        gtp_inspect
-        knxnetip
-        modbus
-        rpc_decode
-        ssh
-        wizard
+    set (STATIC_INSPECTOR_OBJS
+        $<TARGET_OBJECTS:back_orifice>
+        $<TARGET_OBJECTS:dce_rpc>
+        $<TARGET_OBJECTS:dnp3>
+        $<TARGET_OBJECTS:dns>
+        $<TARGET_OBJECTS:ftp_telnet>
+        $<TARGET_OBJECTS:gtp_inspect>
+        $<TARGET_OBJECTS:knxnetip>
+        $<TARGET_OBJECTS:modbus>
+        $<TARGET_OBJECTS:rpc_decode>
+        $<TARGET_OBJECTS:ssh>
+        $<TARGET_OBJECTS:wizard>
     )
 endif()
 

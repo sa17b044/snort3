@@ -18,6 +18,34 @@
 
 #include "knxnetip_module.h"
 
+using namespace snort;
+
+THREAD_LOCAL KNXnetIPStats knxnetip_stats;
+
+//-------------------------------------------------------------------------
+// flow stuff
+//-------------------------------------------------------------------------
+unsigned KNXnetIPFlowData::inspector_id = 0;
+
+void KNXnetIPFlowData::init()
+{
+	inspector_id = FlowData::create_flow_data_id();
+}
+
+KNXnetIPFlowData::KNXnetIPFlowData() : FlowData(inspector_id)
+{
+	reset();
+	knxnetip_stats.concurrent_sessions++;
+	if(knxnetip_stats.max_concurrent_sessions < knxnetip_stats.concurrent_sessions)
+		knxnetip_stats.max_concurrent_sessions = knxnetip_stats.concurrent_sessions;
+}
+
+KNXnetIPFlowData::~KNXnetIPFlowData()
+{
+	assert(knxnetip_stats.concurrent_sessions > 0);
+	knxnetip_stats.concurrent_sessions--;
+}
+
 //-------------------------------------------------------------------------
 // class stuff
 //-------------------------------------------------------------------------
@@ -26,7 +54,7 @@ class KNXnetIP : public Inspector
 {
 public:
     // default ctor / dtor
-    void eval(Packet *p) override;
+    void eval(Packet* p) override;
 
     int get_message_type(int version, const char* name);
     int get_info_type(int version, const char* name);

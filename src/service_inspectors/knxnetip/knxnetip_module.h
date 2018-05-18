@@ -12,9 +12,9 @@
 #define KNXNETIP_NAME "knxnetip"
 #define KNXNETIP_HELP "knxnetip inspection"
 
-extern THREAD_LOCAL ProfileStats knxnetip_prof;
+extern THREAD_LOCAL snort::ProfileStats knxnetip_prof;
 
-class KNXnetIPModule : public Module
+class KNXnetIPModule : public snort::Module
 {
 public:
     KNXnetIPModule();
@@ -22,12 +22,12 @@ public:
     unsigned get_gid() const override
     { return GID_KNXNETIP; }
 
-    const RuleMap* get_rules() const override;
+    const snort::RuleMap* get_rules() const override;
 
     const PegInfo* get_pegs() const override;
     PegCount* get_counts() const override;
 
-    ProfileStats* get_profile() const override
+    snort::ProfileStats* get_profile() const override
     { return &knxnetip_prof; }
 
     Usage get_usage() const override

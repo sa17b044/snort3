@@ -10,7 +10,9 @@
 #include "profiler/profiler.h"
 #include "knxnetip.h"
 
-THREAD_LOCAL ProfileStats knxnetip_prof;
+using namespace snort;
+
+THREAD_LOCAL snort::ProfileStats knxnetip_prof;
 
 
 //-------------------------------------------------------------------------
@@ -30,12 +32,12 @@ PegCount* KNXnetIPModule::get_counts() const
 //-------------------------------------------------------------------------
 // rules
 //-------------------------------------------------------------------------
-static const RuleMap knxnetip_rules[] =
+static const snort::RuleMap knxnetip_rules[] =
 {
         { 0, nullptr }
 };
 
-const RuleMap* KNXnetIPModule::get_rules() const
+const snort::RuleMap* KNXnetIPModule::get_rules() const
 { return knxnetip_rules; }
 
 //-------------------------------------------------------------------------
