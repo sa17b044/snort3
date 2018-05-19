@@ -85,7 +85,7 @@ dofile(conf_dir .. '/snort_defaults.lua')
 -- the following are quite capable with defaults:
 
 stream = { }
--- stream_ip = { }
+stream_ip = { }
 -- stream_icmp = { }
 -- stream_tcp = { }
 stream_udp = { }
@@ -100,6 +100,7 @@ logger = { }
 -- dns = { }
 -- http_inspect = { }
 -- imap = { }
+knxnetip = { }
 -- modbus = { }
 -- normalizer = { }
 -- pop = { }
@@ -151,11 +152,12 @@ reputation =
 
 -- wizard = default_wizard
 
--- binder =
--- {
+binder =
+{
     -- port bindings required for protocols without wizard support
 --     { when = { proto = 'udp', ports = '53' },  use = { type = 'dns' } },
 --     { when = { proto = 'tcp', ports = '111' }, use = { type = 'rpc_decode' } },
+       { when = { proto = 'udp', ports = '3671' }, use = { type = 'knxnetip' } },
 --     { when = { proto = 'tcp', ports = '502' }, use = { type = 'modbus' } },
 --     { when = { proto = 'tcp', ports = '2123 2152 3386' }, use = { type = 'gtp' } },
 
@@ -173,6 +175,7 @@ reputation =
 --     { when = { service = 'gtp' },              use = { type = 'gtp_inspect' } },
 --     { when = { service = 'imap' },             use = { type = 'imap' } },
 --     { when = { service = 'http' },             use = { type = 'http_inspect' } },
+       { when = { service = 'knxnetip' },         use = { type = 'knxnetip' } }
 --     { when = { service = 'modbus' },           use = { type = 'modbus' } },
 --     { when = { service = 'pop3' },             use = { type = 'pop' } },
 --     { when = { service = 'ssh' },              use = { type = 'ssh' } },
@@ -183,7 +186,7 @@ reputation =
 --     { when = { service = 'telnet' },           use = { type = 'telnet' } },
 
 --     { use = { type = 'wizard' } }
--- }
+}
 
 ---------------------------------------------------------------------------
 -- 5. configure performance
