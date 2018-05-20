@@ -48,32 +48,32 @@ alert udp any any -> any any (
 )
 
 # Physical/Individual Addressing: Add Info not considered
-#alert udp any any -> any any (                          
-#  msg:"KNXnet/IP Individual Addressing (L_Data.req)";   
-#  content:"|06 10 04 20|";                              
-#  content:"|11|"; offset: 10;                           
-#  byte_test: 1, =, 0, 13, bitmask 0x80;                 
-#  sid:1000008;                                          
-#  rev:1;                                                
-#)
+alert udp any any -> any any (                          
+  msg:"KNXnet/IP Individual Addressing (L_Data.req)";   
+  content:"|06 10 04 20|";                              
+  content:"|11|", offset 10;                           
+  byte_test: 1, =, 0, 13, bitmask 0x80;                 
+  sid:1000008;                                          
+  rev:1;                                                
+)
 
-#alert udp any any -> any any (                          
-#  msg:"KNXnet/IP Individual Addressing (L_Data.con)";   
-#  content:"|06 10 04 20|";                              
-#  content:"|2e|"; offset: 10;                           
-#  byte_test: 1, =, 0, 13, bitmask 0x80;                 
-#  sid:1000009;                                          
-#  rev:1;                                                
-#)
+alert udp any any -> any any (                          
+  msg:"KNXnet/IP Individual Addressing (L_Data.con)";   
+  content:"|06 10 04 20|";                              
+  content:"|2e|", offset 10;                           
+  byte_test: 1, =, 0, 13, bitmask 0x80;                 
+  sid:1000009;                                          
+  rev:1;                                                
+)
 
-#alert udp any any -> any any (                          
-#  msg:"KNXnet/IP Individual Addressing (L_Data.ind)";   
-#  content:"|06 10 04 20|";                              
-#  content:"|29|"; offset: 10;                           
-#  byte_test: 1, =, 0, 13, bitmask 0x80;                 
-#  sid:1000010;                                          
-#  rev:1;                                                
-#)
+alert udp any any -> any any (                          
+  msg:"KNXnet/IP Individual Addressing (L_Data.ind)";   
+  content:"|06 10 04 20|";                              
+  content:"|29|", offset 10;                           
+  byte_test: 1, =, 0, 13, bitmask 0x80;                 
+  sid:1000010;                                          
+  rev:1;                                                
+)
 
 #
 # BACnet/IP
