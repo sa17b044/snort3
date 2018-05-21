@@ -59,4 +59,5 @@ build.env
 coverage.info
 coverage.txt
 src/uncovered.txt
-/build/
+build/
+*/**/build
