@@ -3,6 +3,8 @@ set( FILE_LIST
     knxnetip.h
     knxnetip_module.cc
     knxnetip_module.h
+    knxnetip_tables.cc
+    knxnetip_enum.h
 )
 
 if (STATIC_INSPECTORS)
