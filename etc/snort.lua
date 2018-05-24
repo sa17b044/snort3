@@ -43,7 +43,57 @@ stream = { }
 stream_ip = { }
 stream_udp = { }
 
-knxnetip = { }
+knxnetip = 
+{ 
+    global_policy = 0,
+    policies =
+    {
+        {
+            individual_addressing = true,
+            services = 
+            {
+                'knx_service',
+                'knx_service2'
+            },
+            group_addressing = true,
+            group_address_file = '/home/alija/Documents/group_address1.esf'
+        },
+        {
+            individual_addressing = false,
+            services = 
+            {
+                'knx2_service',
+                'knx2_service2',
+                'knx2_service3'
+            },
+            group_addressing = false,
+            group_address_file = '/home/alija/Documents/group_address1.esf'
+        }
+    },
+    servers = 
+    {
+        {
+            ip = '172.22.10.76/32',
+            port = 
+            {
+                3671,
+                3672
+            },
+            policy = 1
+        },
+        {
+            ip = '172.22.11.76/32',
+            port = 3672,
+            policy = 1
+        }
+    },
+}
+
+http_inspect =
+{
+    response_depth = 50,
+    request_depth = 100
+}
 
 ---------------------------------------------------------------------------
 -- 4. configure bindings
@@ -58,6 +108,14 @@ binder =
 ---------------------------------------------------------------------------
 -- 5. configure performance
 ---------------------------------------------------------------------------
+
+--perf_monitor = 
+--{
+    -- modules = {},
+--    flow = true,
+--    flow_ip = true,
+--    cpu = true
+--}
 
 ---------------------------------------------------------------------------
 -- 6. configure detection
