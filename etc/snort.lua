@@ -38,42 +38,54 @@ dofile(conf_dir .. '/snort_defaults.lua')
 ---------------------------------------------------------------------------
 -- 3. configure inspection
 ---------------------------------------------------------------------------
-
 stream = { }
 stream_ip = { }
 stream_udp = { }
 
 knxnetip = 
 { 
-    global_policy = 0,
+    global_policy = 1,
     policies =
     {
         {
             individual_addressing = true,
             services = 
             {
-                'knx_service',
-                'knx_service2'
+                'SEARCH_REQUEST',
+                'DESCRIPTION_REQUEST'
             },
             group_addressing = true,
+            group_address_level = 3,
             group_address_file = '/home/alija/Documents/group_address1.esf'
         },
         {
             individual_addressing = false,
             services = 
             {
-                'knx2_service',
-                'knx2_service2',
+                'SEARCH_REQUEST',
+                'CONNECT_REQUEST',
                 'knx2_service3'
             },
             group_addressing = false,
-            group_address_file = '/home/alija/Documents/group_address1.esf'
+            group_address_level = 2,
+            group_address_file = '/home/alija/Documents/group_address2.esf'
+        },
+        {
+            individual_addressing = false,
+            services = 
+            {
+                'SEARCH_REQUEST',
+                'CONNECT_REQUEST',
+                'knx2_service3'
+            },
+            group_addressing = false,
+            group_address_file = '/home/alija/Documents/group_address3.esf'
         }
     },
     servers = 
     {
         {
-            ip = '172.22.10.76/32',
+            cidr = '172.22.10.76/32',
             port = 
             {
                 3671,
@@ -82,9 +94,9 @@ knxnetip =
             policy = 1
         },
         {
-            ip = '172.22.11.76/32',
+            cidr = '244.22.11.76/30',
             port = 3672,
-            policy = 1
+            policy = 2
         }
     },
 }
