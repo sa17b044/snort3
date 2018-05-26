@@ -1,10 +1,12 @@
 set( FILE_LIST
     knxnetip.cc
     knxnetip.h
+    knxnetip_enum.h
     knxnetip_module.cc
     knxnetip_module.h
+    knxnetip_module_enum.h
+    knxnetip_regex.h
     knxnetip_tables.cc
-    knxnetip_enum.h
 )
 
 if (STATIC_INSPECTORS)

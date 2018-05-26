@@ -32,16 +32,24 @@ public:
 	bool individual_addressing = false;
 	bool payload = false;
 	bool group_addressing = false;
+	int group_address_level = 3;
 	std::string group_address_file;
 	std::vector<std::string> services;
+
+// deduced
+	std::vector<uint16_t> group_addresses;
 };
 
 struct KNXnetIPServerParaList
 {
 public:
-	std::string ip;
+	std::string cidr;
 	std::vector<int> ports;
 	int policy;
+
+// deduced
+    std::string ip;
+    std::string subnet;
 };
 
 struct KNXnetIPParaList
@@ -76,6 +84,9 @@ public:
 #endif
 
 private:
+    static bool validate(KNXnetIPParaList *param);
+    static bool load(KNXnetIPParaList *param);
+
     static const snort::Parameter knxnetip_params[];
     static const snort::RuleMap knxnetip_events[];
     KNXnetIPParaList *params = nullptr;
