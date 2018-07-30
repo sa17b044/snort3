@@ -113,8 +113,9 @@ http_inspect =
 
 binder =
 {
-       { when = { proto = 'udp', ports = '3671' }, use = { type = 'knxnetip' } },
-       { when = { service = 'knxnetip' },         use = { type = 'knxnetip' } }
+    -- { when = { proto = 'udp', ports = '3671' }, use = { type = 'knxnetip' } },
+    { when = { proto = 'any', ports = 'any' }, use = { type = 'knxnetip' } },
+    { when = { service = 'knxnetip' },         use = { type = 'knxnetip' } }
 }
 
 ---------------------------------------------------------------------------

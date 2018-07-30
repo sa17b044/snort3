@@ -34,7 +34,7 @@ alert udp any any -> any any (
 )
 
 alert udp any any -> any any (                          
-  msg:"KNXnet/IP DEVICE_CONFIGURATION_REQ";             
+  msg:"KNXnet/IP DEVICE_CONFIGURATION_REQ_ACK";             
   content:"|06 10 03 11|";                              
   sid:1000006;                                          
   rev:1;                                                
