@@ -1,6 +1,8 @@
 set( FILE_LIST
     knxnetip.cc
     knxnetip.h
+    knxnetip_decode.cc
+    knxnetip_decode.h
     knxnetip_enum.h
     knxnetip_module.cc
     knxnetip_module.h
