@@ -20,11 +20,29 @@
 #define KNXNETIP_MODULE_H
 
 #include "framework/module.h"
+#include "sfip/sf_cidr.h"
+#include "sfip/sf_ip.h"
 
 #define GID_KNXNETIP 146
 
 #define KNXNETIP_NAME "knxnetip"
 #define KNXNETIP_HELP "knxnetip inspection"
+
+using namespace snort;
+
+//-------------------------------------------------------------------------
+// knxnetip statistics
+//-------------------------------------------------------------------------
+struct KNXnetIPStats
+{
+    PegCount total_frames;
+};
+
+//extern THREAD_LOCAL KNXnetIPStats knxnetip_stats;
+
+//-------------------------------------------------------------------------
+// knxnetip module
+//-------------------------------------------------------------------------
 
 struct KNXnetIPPolicyParaList
 {
@@ -43,13 +61,9 @@ public:
 struct KNXnetIPServerParaList
 {
 public:
-	std::string cidr;
+    SfCidr cidr;
 	std::vector<int> ports;
 	int policy;
-
-// deduced
-    std::string ip;
-    std::string subnet;
 };
 
 struct KNXnetIPParaList
@@ -60,22 +74,43 @@ public:
 	std::vector<KNXnetIPServerParaList *> servers;
 };
 
-class KNXnetIPModule : public snort::Module
+class KNXnetIPModule : public Module
 {
 public:
     KNXnetIPModule();
     ~KNXnetIPModule() override;
 
-    bool begin(const char*, int, snort::SnortConfig*) override;
-    bool set(const char*, snort::Value&, snort::SnortConfig*) override;
-    bool end(const char*, int, snort::SnortConfig*) override;
+    bool begin(const char*, int, SnortConfig*) override;
+    bool set(const char*, Value&, SnortConfig*) override;
+    bool end(const char*, int, SnortConfig*) override;
 
     unsigned get_gid() const override;
-    const snort::RuleMap* get_rules() const override;
+
+    const Command* get_commands() const override;
+    const RuleMap* get_rules() const override;
     const PegInfo* get_pegs() const override;
+
+//    bool counts_need_prep() const override;
+//    void prep_counts() override;
+
     PegCount* get_counts() const override;
-    snort::ProfileStats* get_profile() const override;
+//    PegCount get_global_count(const char* name) const override;
+//    int get_num_counts() const override;
+    ProfileStats* get_profile() const override;
+//    const char* get_defaults() const override;
+//    bool global_stats() const override;
+
+//    void sum_stats(bool accumulate_now_stats) override;
+//    void show_interval_stats(IndexVec&, FILE*) override;
+//    void show_stats() override;
+//    void reset_stats() override;
+//    void show_dynamic_stats() override;
+
     Module::Usage get_usage() const override;
+
+    static ProfileStats& get_profile_stats();
+    const KNXnetIPParaList *get_params();
+
 
 #ifdef REG_TEST
     static const PegInfo* get_peg_names() { return peg_names; }
@@ -87,11 +122,11 @@ private:
     static bool validate(KNXnetIPParaList *param);
     static bool load(KNXnetIPParaList *param);
 
-    static const snort::Parameter knxnetip_params[];
-    static const snort::RuleMap knxnetip_events[];
+    static const Parameter knxnetip_params[];
+    static const RuleMap knxnetip_events[];
     KNXnetIPParaList *params = nullptr;
     static const PegInfo peg_names[];
-    static THREAD_LOCAL snort::ProfileStats knxnetip_profile;
+    static THREAD_LOCAL ProfileStats knxnetip_profile;
     static THREAD_LOCAL PegCount peg_counts[];
 };
 

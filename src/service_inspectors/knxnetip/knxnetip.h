@@ -1,6 +1,20 @@
+//--------------------------------------------------------------------------
 //
-// Created by alija on 15.05.18.
+// This program is free software; you can redistribute it and/or modify it
+// under the terms of the GNU General Public License Version 2 as published
+// by the Free Software Foundation.  You may not use, modify or distribute
+// this program under any other version of the GNU General Public License.
 //
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along
+// with this program; if not, write to the Free Software Foundation, Inc.,
+// 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//--------------------------------------------------------------------------
+// knxnetip.h author Alija Sabic <sabic@technikum-wien.at>
 
 #ifndef KNXNETIP_H
 #define KNXNETIP_H
@@ -9,13 +23,9 @@
 #include "flow/flow.h"
 #include "framework/counts.h"
 
-struct KNXnetIPStats
-{
-    PegCount sessions;
-    PegCount frames;
-    PegCount concurrent_sessions;
-    PegCount max_concurrent_sessions;
-};
+#include "knxnetip_module.h"
+
+
 
 // (Per-session) data block containing current state
 // of the KNXnetIP preprocessor.
@@ -31,14 +41,8 @@ public:
     ~KNXnetIPFlowData() override;
 
     static void init();
-//    { inspector_id = snort::FlowData::create_flow_data_id(); }
+    void reset();
 
-    void reset()
-    {
-    	session.state = 0;
-    }
-
-private:
     static unsigned inspector_id;
     KNXnetIPData session;
 
@@ -47,6 +51,6 @@ private:
 //int get_message_type(int version, const char* name);
 //int get_info_type(int version, const char* name);
 //
-extern THREAD_LOCAL KNXnetIPStats knxnetip_stats;
+
 
 #endif // KNXNETIP_H

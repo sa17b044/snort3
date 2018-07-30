@@ -24,7 +24,7 @@ namespace KNXnetIPModuleEnums
 
 // Peg counts
 // This enum must remain synchronized with KNXnetIPModule::peg_names[] in knxnetip_tables.cc
-enum PEG_COUNT { PEG_COUNT_MAX = 1 };
+enum PEG_COUNT { PEG_COUNT_TOTAL_FRAMES, PEG_COUNT_MAX };
 
 
 }

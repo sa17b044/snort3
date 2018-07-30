@@ -23,6 +23,38 @@
 #include "knxnetip_module.h"
 #include "framework/counts.h"
 
+using namespace snort;
+
+static const Parameter knxnetip_servers_params[] =
+{
+    {"cidr", Parameter::PT_STRING, nullptr, "0.0.0.0/32", "server ip address (CIDR notation)"},
+    {"port", Parameter::PT_PORT, "1:", "3671", "server port number(s)"},
+    {"policy", Parameter::PT_INT, "1:", "1", "server policy"},
+    { nullptr, Parameter::PT_MAX, nullptr, nullptr, nullptr }
+};
+
+static const Parameter knxnetip_policies_params[] =
+{
+    {"individual_addressing", Parameter::PT_BOOL, nullptr, "false", "individual addressing detection"},
+    // print services
+    {"services", Parameter::PT_STRING, nullptr, nullptr, "service detection"},
+    // FIXIT-S: change to PT_IMPLIED
+    {"payload", Parameter::PT_BOOL, nullptr, "false", "print payload with alert"},
+    // print group addresses
+    {"group_addressing", Parameter::PT_BOOL, nullptr, "false", "group address detection"},
+    {"group_address_level", Parameter::PT_INT, "2:3", "3", "group address level (2/3)"},
+    {"group_address_file", Parameter::PT_STRING, nullptr, nullptr, "group address file"},
+    { nullptr, Parameter::PT_MAX, nullptr, nullptr, nullptr }
+};
+
+const Parameter KNXnetIPModule::knxnetip_params[] =
+{
+    {"global_policy", Parameter::PT_INT, nullptr, 0, "global policy"},
+    {"servers", Parameter::PT_LIST, knxnetip_servers_params, nullptr, "server configuration"},
+    {"policies", Parameter::PT_LIST, knxnetip_policies_params, nullptr, "detection policy"},
+    { nullptr, Parameter::PT_MAX, nullptr, nullptr, nullptr }
+};
+
 const snort::RuleMap KNXnetIPModule::knxnetip_events[] =
 {
 	{ 0, nullptr }
@@ -30,6 +62,7 @@ const snort::RuleMap KNXnetIPModule::knxnetip_events[] =
 
 const PegInfo KNXnetIPModule::peg_names[] =
 {
+    { CountType::SUM, "total_frames", "total frames" },
 	{ CountType::END, nullptr, nullptr }
 };
 
