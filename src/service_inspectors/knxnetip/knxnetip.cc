@@ -14,6 +14,7 @@
 // with this program; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //--------------------------------------------------------------------------
+
 // knxnetip.cc author Alija Sabic <sabic@technikum-wien.at>
 
 #ifdef HAVE_CONFIG_H
@@ -21,89 +22,27 @@
 #endif
 
 #include "knxnetip.h"
-
+#include "knxnetip_detect.h"
+#include "knxnetip_module.h"
+#include "knxnetip_packet.h"
 
 #include "events/event_queue.h"
 #include "detection/detection_engine.h"
 #include "profiler/profiler.h"
-#include "protocols/packet.h"
-
 #include "log/messages.h"
-
-#include "knxnetip_module.h"
-#include "knxnetip_decode.h"
 
 using namespace snort;
 
 THREAD_LOCAL KNXnetIPStats knxnetip_stats;
 
 //-------------------------------------------------------------------------
-// flow stuff
-//-------------------------------------------------------------------------
-unsigned KNXnetIPFlowData::inspector_id = 0;
-
-void KNXnetIPFlowData::init()
-{
-	inspector_id = FlowData::create_flow_data_id();
-}
-
-void KNXnetIPFlowData::reset()
-{
-    session.state = 0;
-}
-
-KNXnetIPFlowData::KNXnetIPFlowData() : FlowData(inspector_id)
-{
-	reset();
-//	knxnetip_stats.concurrent_sessions++;
-//	if(knxnetip_stats.max_concurrent_sessions < knxnetip_stats.concurrent_sessions)
-//		knxnetip_stats.max_concurrent_sessions = knxnetip_stats.concurrent_sessions;
-}
-
-KNXnetIPFlowData::~KNXnetIPFlowData()
-{
-//	assert(knxnetip_stats.concurrent_sessions > 0);
-//	knxnetip_stats.concurrent_sessions--;
-}
-
-//-------------------------------------------------------------------------
 // class stuff
 //-------------------------------------------------------------------------
-
-class KNXnetIP : public Inspector
-{
-public:
-    KNXnetIP(const KNXnetIPParaList *params);
-    ~KNXnetIP();
-
-    bool configure(SnortConfig *) override;
-    void show(SnortConfig *) override;
-    void update(SnortConfig *, const char *) override;
-
-    bool likes(Packet *p) override;
-
-    void eval(Packet* p) override;
-    void clear(Packet* p) override;
-
-    void meta(int, const uint8_t *) override;
-    int exec(int, void *) override;
-
-    int get_message_type(int version, const char* name);
-    int get_info_type(int version, const char* name);
-
-private:
-    const KNXnetIPParaList * const param;
-};
-
-KNXnetIP::KNXnetIP(const KNXnetIPParaList *params) : param(params)
-{
-
-}
+KNXnetIP::KNXnetIP(const knxnetip::module::param* p) : params(p)
+{ }
 
 KNXnetIP::~KNXnetIP()
-{
-    delete param;
-}
+{ }
 
 bool KNXnetIP::configure(SnortConfig *sc)
 {
@@ -118,21 +57,21 @@ void KNXnetIP::show(SnortConfig *sc)
     int i = 0;
 }
 
-void KNXnetIP::update(SnortConfig *sc, const char *c)
-{
-    int i = 0;
-
-}
-
 bool KNXnetIP::likes(Packet *p)
 {
-    int i = 0;
+    return true;
 
-    // check server config resp. policy
+    if(!p->has_udp_data()) {
+        return false;
+    }
+
+    if(knxnetip::module::get_policy(params, p) == nullptr) {
+        return false;
+    }
+
+    // check if KNXnet/IP
 
     // check if auto detect
-
-    // check ip, port
 
     return true;
 }
@@ -140,46 +79,21 @@ bool KNXnetIP::likes(Packet *p)
 
 void KNXnetIP::eval(Packet *p)
 {
-//    LogMessage("Hello Snort!\n");
-//    p->has_tcp_data();
-//    p->has_udp_data();
 
-//    if (p->is_full_pdu())
-//    {
-//        LogMessage("full pdu\n.");
-//    }
-//
-    LogMessage("packet flags: \e[38;5;161m0x%x\e[39m\n\n", p->packet_flags);
+    Profile profile(knxnetip_prof);
+//    LogMessage("packet flags: \e[38;5;161m0x%x\e[39m\n\n", p->packet_flags);
 
     // get policy
+    const knxnetip::module::policy* policy = knxnetip::module::get_policy(params, p);
+
+    // decode packet
+    knxnetip::Packet knxp{knxnetip::packet::dissect(p)};
+
+    // analyze packet
+    knxnetip::packet::detect(knxp, policy);
 
     // peg counts
-
-    // dissect
-
-    // policy -> detect
-
-    // alert
-
-    // peg counts?
-
-
-    Profile profile(KNXnetIPModule::get_profile_stats());
-
-    KNXnetIPFlowData *knxfd
-        {(KNXnetIPFlowData *)p->flow->get_flow_data(KNXnetIPFlowData::inspector_id)};
-
-    // reset knxfd
-
-    if (!knxfd)
-    {
-        knxfd = new KNXnetIPFlowData;
-        p->flow->set_flow_data(knxfd);
-        knxnetip_stats.total_frames++;
-    }
-
-    if (!KNXnetIPDecode(p))
-        knxfd->reset();
+    knxnetip_stats.frames++;
 
 }
 
@@ -193,26 +107,13 @@ void KNXnetIP::meta(int i, const uint8_t *d)
     int ii = 0;
 }
 
-int KNXnetIP::exec(int i, void *v)
-{
-    int ii = 0;
-
-    return 0;
-}
-
-
-
-
 int KNXnetIP::get_message_type(int version, const char *name)
 {
-
     return 0;
 }
 
 int KNXnetIP::get_info_type(int version, const char *name)
 {
-
-
     return 0;
 }
 
@@ -227,14 +128,12 @@ static void mod_dtor(Module *m)
 { delete m; }
 
 static void knxnetip_init()
-{
-    KNXnetIPFlowData::init();
-}
+{ }
 
 static Inspector* knxnetip_ctor(Module *m)
 {
-    KNXnetIPModule * const mod = (KNXnetIPModule *)m;
-    return new KNXnetIP(mod->get_params());
+    KNXnetIPModule* const mod = static_cast<KNXnetIPModule*>(m);
+    return new KNXnetIP(&mod->params);
 }
 
 static void knxnetip_dtor(Inspector* p)

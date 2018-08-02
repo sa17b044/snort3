@@ -20,37 +20,37 @@
 #define KNXNETIP_H
 
 #include <cstdint>
-#include "flow/flow.h"
 #include "framework/counts.h"
+#include "protocols/packet.h"
 
 #include "knxnetip_module.h"
 
-
-
-// (Per-session) data block containing current state
-// of the KNXnetIP preprocessor.
-struct KNXnetIPData
+struct KNXnetIPStats
 {
-    uint32_t state;
+    PegCount frames;
 };
 
-class KNXnetIPFlowData : public snort::FlowData
+class KNXnetIP : public Inspector
 {
 public:
-    KNXnetIPFlowData();
-    ~KNXnetIPFlowData() override;
+    KNXnetIP(const knxnetip::module::param *p);
+    ~KNXnetIP();
 
-    static void init();
-    void reset();
+    bool configure(SnortConfig *) override;
+    void show(SnortConfig *) override;
 
-    static unsigned inspector_id;
-    KNXnetIPData session;
+    bool likes(Packet *p) override;
+    void eval(Packet* p) override;
+    void clear(Packet* p) override;
 
+    void meta(int, const uint8_t *) override;
+
+    int get_message_type(int version, const char* name);
+    int get_info_type(int version, const char* name);
+
+private:
+    const knxnetip::module::param* const params;
 };
 
-//int get_message_type(int version, const char* name);
-//int get_info_type(int version, const char* name);
-//
-
-
+extern THREAD_LOCAL KNXnetIPStats knxnetip_stats;
 #endif // KNXNETIP_H
