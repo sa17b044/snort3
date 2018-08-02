@@ -20,12 +20,9 @@
 #include "config.h"
 #endif
 
-#include "knxnetip_module.h"
-#include "framework/counts.h"
+#include "knxnetip_tables.h"
 
-using namespace snort;
-
-static const Parameter knxnetip_servers_params[] =
+const Parameter knxnetip::module::server_params[] =
 {
     {"cidr", Parameter::PT_STRING, nullptr, "0.0.0.0/32", "server ip address (CIDR notation)"},
     {"port", Parameter::PT_PORT, "1:", "3671", "server port number(s)"},
@@ -33,36 +30,40 @@ static const Parameter knxnetip_servers_params[] =
     { nullptr, Parameter::PT_MAX, nullptr, nullptr, nullptr }
 };
 
-static const Parameter knxnetip_policies_params[] =
+const Parameter knxnetip::module::policy_params[] =
 {
-    {"individual_addressing", Parameter::PT_BOOL, nullptr, "false", "individual addressing detection"},
+    {"individual_addressing",Parameter::PT_BOOL,nullptr, "false", "individual addressing detection"},
     // print services
     {"services", Parameter::PT_STRING, nullptr, nullptr, "service detection"},
     // FIXIT-S: change to PT_IMPLIED
     {"payload", Parameter::PT_BOOL, nullptr, "false", "print payload with alert"},
     // print group addresses
     {"group_addressing", Parameter::PT_BOOL, nullptr, "false", "group address detection"},
-    {"group_address_level", Parameter::PT_INT, "2:3", "3", "group address level (2/3)"},
+    {"group_address_level", Parameter::PT_INT, "2:3", "3",  "group address level (2/3)"},
     {"group_address_file", Parameter::PT_STRING, nullptr, nullptr, "group address file"},
     { nullptr, Parameter::PT_MAX, nullptr, nullptr, nullptr }
 };
 
-const Parameter KNXnetIPModule::knxnetip_params[] =
+const Parameter knxnetip::module::params[] =
 {
     {"global_policy", Parameter::PT_INT, nullptr, 0, "global policy"},
-    {"servers", Parameter::PT_LIST, knxnetip_servers_params, nullptr, "server configuration"},
-    {"policies", Parameter::PT_LIST, knxnetip_policies_params, nullptr, "detection policy"},
+    {"servers", Parameter::PT_LIST, server_params, nullptr, "server configuration"},
+    {"policies", Parameter::PT_LIST, policy_params, nullptr, "detection policy"},
     { nullptr, Parameter::PT_MAX, nullptr, nullptr, nullptr }
 };
 
-const snort::RuleMap KNXnetIPModule::knxnetip_events[] =
+const snort::RuleMap knxnetip::module::events[] =
 {
 	{ 0, nullptr }
 };
 
-const PegInfo KNXnetIPModule::peg_names[] =
+const PegInfo knxnetip::module::peg_names[] =
 {
     { CountType::SUM, "total_frames", "total frames" },
 	{ CountType::END, nullptr, nullptr }
 };
 
+const RuleMap knxnetip::module::rules[] = {
+    { KNXNETIP_DUMMY, KNXNETIP_DUMMY_STR },
+    { 0, nullptr }
+};
