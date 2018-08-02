@@ -30,8 +30,6 @@ KNX_NET = [[172.22.10.76/32 172.22.10.77/32]]
 BAC_NET = [[172.22.11.76/32 172.22.11.77/32]]
 ENO_NET = '172.22.13.76/32'
 
-
-
 dofile(conf_dir .. '/snort_defaults.lua')
 -- dofile(conf_dir .. '/file_magic.lua')
 
@@ -40,6 +38,7 @@ dofile(conf_dir .. '/snort_defaults.lua')
 ---------------------------------------------------------------------------
 stream = { }
 stream_ip = { }
+stream_tcp = { }
 stream_udp = { }
 
 knxnetip = 
@@ -94,17 +93,11 @@ knxnetip =
             policy = 1
         },
         {
-            cidr = '244.22.11.76/30',
+            cidr = '192.164.1.2/16',
             port = 3672,
             policy = 2
         }
     },
-}
-
-http_inspect =
-{
-    response_depth = 50,
-    request_depth = 100
 }
 
 ---------------------------------------------------------------------------
@@ -122,17 +115,30 @@ binder =
 -- 5. configure performance
 ---------------------------------------------------------------------------
 
---perf_monitor = 
---{
-    -- modules = {},
---    flow = true,
---    flow_ip = true,
---    cpu = true
---}
+perf_monitor = 
+{
+    modules = {},
+    flow = true,
+    flow_ip = true,
+    cpu = true
+}
 
 ---------------------------------------------------------------------------
 -- 6. configure detection
 ---------------------------------------------------------------------------
+
+references = default_references
+classifications = default_classifications
+
+ips =
+{
+    -- use this to enable decoder and inspector alerts
+    enable_builtin_rules = true,
+
+    -- use include for rules files; be sure to set your path
+    -- note that rules files can include other rules files
+    --include = 'snort3_community.rules'
+}
 
 ---------------------------------------------------------------------------
 -- 7. configure filters
