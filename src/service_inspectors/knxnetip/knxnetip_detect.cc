@@ -14,17 +14,26 @@
 // with this program; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //--------------------------------------------------------------------------
-// knxnetip_decode.h author Alija Sabic <sabic@technikum-wien.at>
+// knxnetip_decode.cc author Alija Sabic <sabic@technikum-wien.at>
 
-#ifndef KNXNETIP_DECODE_H
-#define KNXNETIP_DECODE_H
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
+#include "knxnetip_detect.h"
+#include "knxnetip_module.h"
+#include "knxnetip_tables.h"
 
-namespace snort
+#include "detection/detection_engine.h"
+#include "events/event_queue.h"
+#include "managers/event_manager.h"
+#include "protocols/packet.h"
+
+#include "log/messages.h"
+
+void knxnetip::packet::detect(knxnetip::Packet& p, const knxnetip::module::policy* policy)
 {
-struct Packet;
+    DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_DUMMY);
 }
 
-bool KNXnetIPDecode(snort::Packet *);
 
-#endif /* KNXNETIP_DECODE_H */

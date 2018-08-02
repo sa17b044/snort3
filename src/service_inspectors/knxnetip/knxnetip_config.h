@@ -14,34 +14,49 @@
 // with this program; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //--------------------------------------------------------------------------
-// knxnetip_decode.cc author Alija Sabic <sabic@technikum-wien.at>
+// knxnetip_module.h author Alija Sabic <sabic@technikum-wien.at>
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#ifndef KNXNETIP_SETTINGS_H
+#define KNXNETIP_SETTINGS_H
 
-#include "knxnetip_decode.h"
-#include "knxnetip_module.h"
-
-#include "detection/detection_engine.h"
-#include "events/event_queue.h"
-#include "managers/event_manager.h"
+#include <vector>
+#include "sfip/sf_cidr.h"
+#include "sfip/sf_ip.h"
 #include "protocols/packet.h"
-
-#include "log/messages.h"
 
 using namespace snort;
 
-bool KNXnetIPDecode(Packet *p)
-{
-    static int i = 0;
+namespace knxnetip {
+namespace module {
 
-    i++;
-    LogMessage("detect %d\n",i);
+    struct policy {
+        bool individual_addressing = false;
+        bool payload = false;
+        bool group_addressing = false;
+        int group_address_level = 3;
+        std::string group_address_file;
+        std::vector<std::string> services;
 
-//    EventManager::call_alerters(0, p, nullptr, nullptr);
-    DetectionEngine::queue_event(GID_KNXNETIP, 1);
+        // deduced
+        std::vector<uint16_t> group_addresses;
+    };
 
-//    DetectionEngine::queue_event(GID_KNXNETIP, 1);
-    return true;
+    struct server {
+        SfCidr cidr;
+        std::vector<int> ports;
+        int policy;
+    };
+
+    struct param {
+        int global_policy;
+        std::vector<policy> policies;
+        std::vector<server> servers;
+    };
+
+    bool validate(param& param);
+    bool load(param& param);
+    const policy* get_policy(const param* param, const Packet *p);
 }
+}
+
+#endif /* KNXNETIP_SETTINGS_H */
