@@ -28,23 +28,180 @@
 #include "knxnetip_enum.h"
 #include "knxnetip_regex.h"
 
-// FIXIT-M: Move to knxnetip related processing
-static uint16_t get_group_address(std::string m, std::string s)
+bool knxnetip::module::policy::load_group_addr(void)
 {
-    return (((uint16_t)std::stoi(m))  << 11) |
-            ((uint16_t)std::stoi(s));
-}
-// FIXIT-M: Move to knxnetip related processing
-static uint16_t get_group_address(std::string m, std::string mid, std::string s)
-{
-    return (((uint16_t)std::stoi(m))  << 11) |
-           (((uint16_t)std::stoi(mid)) << 8) |
-            ((uint16_t)std::stoi(s));
+    bool result = false;
+    std::smatch m;
+
+    LogMessage("file: %s\n", group_address_file.c_str());
+
+    /* extract file extension */
+    std::string ext;
+    std::regex r_ext{knxnetip::regex::file_ext};
+    if(std::regex_search(group_address_file, m, r_ext))
+    {
+        ext = m[1].str();
+        result = true;
+    }
+    else
+    {
+        LogMessage("ERROR: failed to load group address. Cannot determine file extension (e.g. xml, csv) of '%s'\n", group_address_file.c_str());
+        return false;
+    }
+
+
+    /* read each line */
+    std::ifstream in(group_address_file);
+    std::string line;
+
+    while(std::getline(in, line))
+    {
+        bool valid = false;
+        std::string group_address;
+        std::string data_point_type;
+
+        if (ext == "xml")
+        {
+            // validate line
+            std::regex rl{knxnetip::regex::xml::valid_line};
+            if (!std::regex_search(line, m, rl))
+                continue;
+
+            std::string vl{m[0].str()};
+
+            // validate group address
+            std::regex rg{knxnetip::regex::xml::valid_address};
+            if (!std::regex_search(vl, m, rg))
+                continue;
+
+            group_address.assign(m[1].str());
+
+            // validate data point type
+            std::regex rdpt{knxnetip::regex::xml::valid_dpt};
+            if (!std::regex_search(vl, m, rdpt))
+                continue;
+
+            data_point_type.assign(m[1].str());
+
+            valid = true;
+        }
+        else if (ext == "csv")
+        {
+            // validate group address
+            std::regex rg{knxnetip::regex::csv::valid_address};
+            if (!std::regex_search(line, m, rg))
+                continue;
+
+            group_address.assign(m[1].str());
+
+            // validate data point type
+            std::regex rdpt{knxnetip::regex::csv::valid_dpt};
+            if (!std::regex_search(line, m, rdpt))
+                continue;
+
+            data_point_type.assign(m[1].str());
+
+            valid = true;
+        }
+
+        /* Add Group Address data */
+        if (valid)
+        {
+            uint16_t g{0};
+            uint32_t dpt{0};
+
+            /* validate and convert group address */
+            if (group_address_level == 2)
+            {
+                std::regex rg{knxnetip::regex::group_address_2l};
+                if (std::regex_search(group_address, m, rg))
+                {
+                    unsigned long main {std::stoul(m[1].str())};
+                    unsigned long device {std::stoul(m[2].str())};
+
+                    if (main > 31 or device > 2047)
+                    {
+                        LogMessage("ERROR: invalid group address: %s\n", group_address.c_str());
+                    }
+                    else
+                    {
+                        g = (main << 11) | device;
+                    }
+                }
+            }
+            else if (group_address_level == 3)
+            {
+                std::regex rg{knxnetip::regex::group_address_3l};
+                if (std::regex_search(group_address, m, rg))
+                {
+                    unsigned long main {std::stoul(m[1].str())};
+                    unsigned long middle {std::stoul(m[2].str())};
+                    unsigned long device {std::stoul(m[3].str())};
+
+                    if (main > 31 or middle > 7 or device > 255)
+                    {
+                        LogMessage("ERROR: invalid group address: %s\n", group_address.c_str());
+                    }
+                    else
+                    {
+                        g = (main << 11) | (middle << 8) | device;
+                    }
+                }
+            }
+
+            /* validate and convert data point type */
+            std::regex rdpt{knxnetip::regex::data_point_type};
+            if (std::regex_search(data_point_type, m, rdpt))
+            {
+                unsigned long range {std::stoul(m[1].str())};
+                unsigned long unit {1};
+
+                if (m[2].matched)
+                {
+                    unit = std::stoul(m[2].str());
+                }
+
+                if (range > 65535 or unit > 65535)
+                {
+                    LogMessage("ERROR: invalid data point type: %s\n", data_point_type.c_str());
+                }
+                else
+                {
+                    dpt = (range << 16) | unit;
+                }
+            }
+
+            /* Add converted values */
+            if (g == 0)
+            {
+                LogMessage("ERROR: invalid group address: %s\n", m[1].str().c_str());
+            }
+
+            if (dpt == 0)
+            {
+                LogMessage("ERROR: invalid data point type: %s\n", m[1].str().c_str());
+            }
+
+            if (g != 0 and dpt != 0)
+            {
+                Spec d{};
+                d.dpt = dpt;
+                d.max = 0;
+                d.min = 0;
+                d.frequency = 0;
+                d.duration = 0;
+
+                group_addresses.insert(std::pair<uint16_t,Spec>(g, d));
+            }
+        }
+    }
+
+    return result;
 }
 
 bool knxnetip::module::validate(param& params) {
 
-    // validate server config
+    // validate server configuration
     for (int i = 0; i < params.servers.size(); i++)
     {
         server& s{params.servers[i]};
@@ -58,7 +215,7 @@ bool knxnetip::module::validate(param& params) {
 
     }
 
-    // validate policy config
+    // validate policy configuration
     for (int i = 0; i < params.policies.size(); i++)
     {
         policy& p{params.policies[i]};
@@ -118,6 +275,9 @@ bool knxnetip::module::load(param& params) {
 
         if (!p.group_address_file.empty())
         {
+            p.load_group_addr();
+
+            /*
             std::string regexp;
             if (p.group_address_level == 2)
                 regexp.assign(KNXNETIP_GRP_ADDR_2_REGEX);
@@ -150,6 +310,7 @@ bool knxnetip::module::load(param& params) {
                     }
                 }
             }
+            */
         }
     }
 

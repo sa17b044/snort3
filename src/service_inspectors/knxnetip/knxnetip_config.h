@@ -27,37 +27,49 @@
 using namespace snort;
 
 namespace knxnetip {
-namespace module {
+    namespace module {
 
-    struct policy {
-        bool individual_addressing = false;
-        bool payload = false;
-        bool group_addressing = false;
-        int group_address_level = 3;
-        std::string group_address_file;
-        std::vector<std::string> services;
+        struct Spec
+        {
+            uint32_t dpt;
 
-        // deduced
-        std::vector<uint16_t> group_addresses;
-    };
+            uint8_t max;
+            uint8_t min;
+            uint8_t frequency;
+            uint8_t duration;
+        };
 
-    struct server {
-        SfCidr cidr;
-        std::vector<int> ports;
-        int policy;
-    };
+        struct policy {
+            bool individual_addressing = false;
+            bool payload = false;
+            bool group_addressing = false;
+            int group_address_level = 3;
+            std::string group_address_file;
+            std::vector<std::string> services;
 
-    struct param {
-        int global_policy;
-        std::vector<policy> policies;
-        std::vector<server> servers;
-    };
+            // deduced
+            std::map<uint16_t,Spec> group_addresses;
+            bool load_group_addr(void);
+        };
 
-    bool validate(param& param);
-    bool load(param& param);
-    const policy& get_policy(const param* param, const snort::Packet *p);
-    bool has_policy(const param* param, const snort::Packet *p);
-}
+        struct server {
+            SfCidr cidr;
+            std::vector<int> ports;
+            int policy;
+        };
+
+        struct param {
+            int global_policy;
+            std::vector<policy> policies;
+            std::vector<server> servers;
+
+        };
+
+        bool validate(param& param);
+        bool load(param& param);
+        const policy& get_policy(const param* param, const snort::Packet *p);
+        bool has_policy(const param* param, const snort::Packet *p);
+    }
 }
 
 #endif /* KNXNETIP_SETTINGS_H */
