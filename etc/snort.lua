@@ -55,7 +55,7 @@ knxnetip =
             },
             group_addressing = true,
             group_address_level = 3,
-            group_address_file = '/home/alija/Documents/group_address1.esf'
+            group_address_file = 'etc/knxnetip/group_address.xml'
         },
         {
             individual_addressing = false,
@@ -67,7 +67,7 @@ knxnetip =
             },
             group_addressing = false,
             group_address_level = 2,
-            group_address_file = '/home/alija/Documents/group_address2.esf'
+            group_address_file = 'etc/knxnetip/group_address.csv'
         },
         {
             individual_addressing = false,

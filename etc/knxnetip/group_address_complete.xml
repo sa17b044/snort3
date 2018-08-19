@@ -1,0 +1,82 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<GroupAddress-Export xmlns="http://knx.org/xml/ga-export/01">
+  <!--GroupRange:-->
+  <!--  @Name: The name of the group range (1 to 255 characters)-->
+  <!--  @RangeStart: The inclusive start address of the range as specified in free group address style-->
+  <!--  @RangeEnd: The inclusive end address of the range as specified in free group address style-->
+  <!--  @Description: The group ranges' description if available-->
+  <!--GroupAddress:-->
+  <!--  @Name: The name of the group range (1 to 255 characters)-->
+  <!--  @Address: The address as specified either in three-level (1/2/3 or two-level (1/3) or numeric (12345) or hexadecimal ($1Fa3 or 0x1fa3) group address value-->
+  <!--  @Central: True if the group address has the Central flag set-->
+  <!--  @Unfiltered: True if the group address has the Unfiltered flag set-->
+  <!--  @Description: The group addresses' description if available-->
+  <!--  @DTPs: The Data Point Types associated with the group address if available, comma separated, e.g. '1.001, 1.002'-->
+  <GroupRange Name="Zentral" RangeStart="1" RangeEnd="2047">
+    <GroupRange Name="Licht" RangeStart="1" RangeEnd="255">
+      <GroupAddress Name="Zentral" Address="0/0/1" Central="true" DPTs="DPST-1-1" />
+    </GroupRange>
+    <GroupRange Name="Zeit" RangeStart="256" RangeEnd="511">
+      <GroupAddress Name="Datum und Zeit" Address="0/1/0" DPTs="DPT-19" />
+    </GroupRange>
+  </GroupRange>
+  <GroupRange Name="Licht" RangeStart="2048" RangeEnd="4095">
+    <GroupRange Name="RaumA" RangeStart="2048" RangeEnd="2303">
+      <GroupAddress Name="LichtA1 - Schalten EinAus" Address="1/0/0" DPTs="DPST-1-1" />
+      <GroupAddress Name="LichtA1 - Status Ein Aus" Address="1/0/1" DPTs="DPST-1-1" />
+      <GroupAddress Name="LichtA2 - Schalten EinAus" Address="1/0/2" DPTs="DPST-1-1" />
+      <GroupAddress Name="LichtA2 - Status Ein Aus" Address="1/0/3" DPTs="DPST-1-1" />
+      <GroupAddress Name="LichtA3 - Schalten EinAus" Address="1/0/4" DPTs="DPST-1-1" />
+      <GroupAddress Name="LichtA3 - Status Ein Aus" Address="1/0/5" DPTs="DPST-1-1" />
+      <GroupAddress Name="LichtA3 - Rel Dimm" Address="1/0/6" DPTs="DPST-3-7" />
+      <GroupAddress Name="LichtA3 - Abs Dimm" Address="1/0/7" DPTs="DPST-5-1" />
+      <GroupAddress Name="LichtA3 - Status Dimmwert" Address="1/0/8" DPTs="DPST-5-1" />
+    </GroupRange>
+    <GroupRange Name="RaumB" RangeStart="2304" RangeEnd="2559">
+      <GroupAddress Name="LichtB1 - Schalten EinAus" Address="1/1/0" DPTs="DPST-1-1" />
+      <GroupAddress Name="LichtB1 - Status Ein Aus" Address="1/1/1" DPTs="DPST-1-1" />
+      <GroupAddress Name="LichtB2 - Schalten EinAus" Address="1/1/2" DPTs="DPST-1-1" />
+      <GroupAddress Name="LichtB2 - Status Ein Aus" Address="1/1/3" DPTs="DPST-1-1" />
+      <GroupAddress Name="LichtB2 - Rel Dimm" Address="1/1/4" DPTs="DPST-3-7" />
+      <GroupAddress Name="LichtB2 - Abs Dimm" Address="1/1/5" DPTs="DPST-5-1" />
+      <GroupAddress Name="LichtB2 - Status Dimmwert" Address="1/1/6" DPTs="DPST-5-1" />
+    </GroupRange>
+    <GroupRange Name="Treppenhaus" RangeStart="2560" RangeEnd="2815">
+      <GroupAddress Name="LichtTreppe - Schalten EinAus" Address="1/2/0" DPTs="DPST-1-1" />
+      <GroupAddress Name="LichtTreppe - Status EinAus" Address="1/2/1" DPTs="DPST-1-1" />
+    </GroupRange>
+  </GroupRange>
+  <GroupRange Name="Jalousie" RangeStart="4096" RangeEnd="6143">
+    <GroupRange Name="RaumA" RangeStart="4096" RangeEnd="4351">
+      <GroupAddress Name="J1 - Auf/Ab" Address="2/0/0" DPTs="DPST-1-8" />
+      <GroupAddress Name="J1 - Stop/Lamelle" Address="2/0/1" DPTs="DPST-1-9" />
+      <GroupAddress Name="J1 - Status Position Absolut" Address="2/0/2" DPTs="DPST-5-1" />
+    </GroupRange>
+    <GroupRange Name="RaumB" RangeStart="4352" RangeEnd="4607">
+      <GroupAddress Name="J2 - Auf/Ab" Address="2/1/0" DPTs="DPST-1-8" />
+      <GroupAddress Name="J2 - Stop/Lamelle" Address="2/1/1" DPTs="DPST-1-9" />
+      <GroupAddress Name="J2 - Status Position Absolut" Address="2/1/2" DPTs="DPST-5-1" />
+    </GroupRange>
+  </GroupRange>
+  <GroupRange Name="HLK" RangeStart="6144" RangeEnd="8191">
+    <GroupRange Name="RaumA" RangeStart="6144" RangeEnd="6399">
+      <GroupAddress Name="RaumA - Temperatur Ist" Address="3/0/0" DPTs="DPST-9-1" />
+      <GroupAddress Name="RaumA - Sollwertverschiebung Heizen" Address="3/0/1" DPTs="DPST-1-7" />
+      <GroupAddress Name="RaumA - Sollwertverschiebung Kühlen" Address="3/0/2" DPTs="DPST-1-7" />
+      <GroupAddress Name="RaumA - Sollwert Status Heizen" Address="3/0/3" DPTs="DPST-9-1" />
+      <GroupAddress Name="RaumA - Sollwert Status Kühlen" Address="3/0/4" DPTs="DPST-9-1" />
+      <GroupAddress Name="RaumA - Stellgröße Heizen" Address="3/0/5" DPTs="DPST-5-1" />
+      <GroupAddress Name="RaumA - Stellgröße Kühlen" Address="3/0/6" DPTs="DPST-5-1" />
+    </GroupRange>
+    <GroupRange Name="RaumB" RangeStart="6400" RangeEnd="6655">
+      <GroupAddress Name="RaumB - Temperatur Ist" Address="3/1/0" DPTs="DPST-9-1" />
+      <GroupAddress Name="RaumB - Sollwertverschiebung" Address="3/1/1" />
+      <GroupAddress Name="RaumB - Sollwert Status" Address="3/1/2" DPTs="DPST-9-1" />
+      <GroupAddress Name="RaumB - Stellgröße Heizen" Address="3/1/3" DPTs="DPST-5-1" />
+      <GroupAddress Name="RaumB - Stellgröße Kühlen" Address="3/1/4" DPTs="DPST-5-1" />
+    </GroupRange>
+    <GroupRange Name="Allgemein" RangeStart="6656" RangeEnd="6911">
+      <GroupAddress Name="Stoerung_HLK" Address="3/2/0" />
+    </GroupRange>
+  </GroupRange>
+</GroupAddress-Export>
