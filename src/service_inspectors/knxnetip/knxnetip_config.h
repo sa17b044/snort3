@@ -55,7 +55,8 @@ namespace module {
 
     bool validate(param& param);
     bool load(param& param);
-    const policy* get_policy(const param* param, const Packet *p);
+    const policy& get_policy(const param* param, const snort::Packet *p);
+    bool has_policy(const param* param, const snort::Packet *p);
 }
 }
 

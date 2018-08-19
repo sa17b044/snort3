@@ -77,10 +77,9 @@ bool knxnetip::module::validate(param& params) {
             std::string s {p.services.at(j)};
             bool found = false;
 
-            for (int k = 0; knxnetip::service_identifier[k].text != nullptr; k++)
+            for (auto srv : knxnetip::service_identifier)
             {
-                if (!strcmp(s.c_str(), knxnetip::service_identifier[k].text))
-                {
+                if(s == srv.second) {
                     found = true;
                     break;
                 }
@@ -100,6 +99,12 @@ bool knxnetip::module::validate(param& params) {
 
 bool knxnetip::module::load(param& params) {
 
+    /* FIXME-H:
+     * check if at least one policy is available,
+     * if not, create default one.
+     */
+
+    /*FIXME: configuration */
     // server
 //    for (int i = 0; i < params.servers.size(); i++)
 //    {
@@ -151,20 +156,42 @@ bool knxnetip::module::load(param& params) {
     return true;
 }
 
-const knxnetip::module::policy* knxnetip::module::get_policy(const param* param, const Packet* p)
+const knxnetip::module::policy& knxnetip::module::get_policy(const param* param, const snort::Packet* p)
 {
     for (auto s : param->servers) {
         if (s.cidr.contains(p->ptrs.ip_api.get_src()) == SfIpRet::SFIP_CONTAINS) {
-            return &param->policies.at(s.policy);
+            return param->policies.at(s.policy);
         }
         if (s.cidr.contains(p->ptrs.ip_api.get_dst()) == SfIpRet::SFIP_CONTAINS) {
-            return &param->policies.at(s.policy);
+            return param->policies.at(s.policy);
         }
     }
 
     if (param->global_policy > 0) {
-        return &param->policies.at(param->global_policy-1);
+        return param->policies.at(param->global_policy-1);
     }
 
-    return static_cast<policy*>(nullptr);
+    return param->policies.at(0);
+}
+
+bool knxnetip::module::has_policy(const param* param, const snort::Packet *p)
+{
+    bool r = false;
+
+    for (auto s : param->servers) {
+        if (s.cidr.contains(p->ptrs.ip_api.get_src()) == SfIpRet::SFIP_CONTAINS) {
+            r = true;
+            break;
+        }
+        if (s.cidr.contains(p->ptrs.ip_api.get_dst()) == SfIpRet::SFIP_CONTAINS) {
+            r = true;
+            break;
+        }
+    }
+
+    if (param->global_policy > 0) {
+        r = true;
+    }
+
+    return r;
 }
