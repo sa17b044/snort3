@@ -86,6 +86,7 @@ bool KNXnetIPModule::begin(const char *fqn, int idx, SnortConfig *)
 
 	return true;
 }
+
 bool KNXnetIPModule::set(const char *fqn, Value& val, SnortConfig *sc)
 {
 	// global
@@ -104,10 +105,15 @@ bool KNXnetIPModule::set(const char *fqn, Value& val, SnortConfig *sc)
 			unsigned n;
 			std::string s((char *)val.get_buffer(n));
 
-			std::regex r {KNXNETIP_CIDR_REGEX};
+			std::regex r {knxnetip::regex::cidr};
 			std::smatch m;
 
-			if(std::regex_search(s, m, r))
+			if(std::regex_search(s, m, r) and
+			   m[1].matched and std::stoul(m[1].str()) <= 255 and
+			   m[2].matched and std::stoul(m[2].str()) <= 255 and
+			   m[3].matched and std::stoul(m[3].str()) <= 255 and
+			   m[4].matched and std::stoul(m[4].str()) <= 255 and
+			   m[5].matched and std::stoul(m[5].str()) <= 32)
 			{
 			    sworker->cidr.set(s.c_str());
 			}
