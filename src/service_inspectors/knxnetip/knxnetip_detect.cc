@@ -14,7 +14,7 @@
 // with this program; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //--------------------------------------------------------------------------
-// knxnetip_decode.cc author Alija Sabic <sabic@technikum-wien.at>
+// knxnetip_detect.cc author Alija Sabic <sabic@technikum-wien.at>
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -31,9 +31,9 @@
 
 #include "log/messages.h"
 
-void knxnetip::packet::detect(knxnetip::Packet& p, const knxnetip::module::policy* policy)
+void knxnetip::packet::detect(knxnetip::Packet& p, const knxnetip::module::policy& policy)
 {
-    DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_DUMMY);
+//    DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_DUMMY);
 }
 
 

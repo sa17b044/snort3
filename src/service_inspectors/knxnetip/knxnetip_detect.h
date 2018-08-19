@@ -14,7 +14,7 @@
 // with this program; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //--------------------------------------------------------------------------
-// knxnetip_decode.h author Alija Sabic <sabic@technikum-wien.at>
+// knxnetip_detect.h author Alija Sabic <sabic@technikum-wien.at>
 
 #ifndef KNXNETIP_DETECT_H
 #define KNXNETIP_DETECT_H
@@ -30,7 +30,7 @@ struct Packet;
 namespace knxnetip {
 
 namespace packet {
-void detect(knxnetip::Packet& p, const knxnetip::module::policy* policy);
+void detect(knxnetip::Packet& p, const knxnetip::module::policy& policy);
 }
 
 }
