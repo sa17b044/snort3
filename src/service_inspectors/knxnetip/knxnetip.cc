@@ -14,7 +14,6 @@
 // with this program; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //--------------------------------------------------------------------------
-
 // knxnetip.cc author Alija Sabic <sabic@technikum-wien.at>
 
 #ifdef HAVE_CONFIG_H
@@ -65,7 +64,7 @@ bool KNXnetIP::likes(Packet *p)
         return false;
     }
 
-    if(knxnetip::module::get_policy(params, p) == nullptr) {
+    if(knxnetip::module::has_policy(params, p)) {
         return false;
     }
 
@@ -79,18 +78,22 @@ bool KNXnetIP::likes(Packet *p)
 
 void KNXnetIP::eval(Packet *p)
 {
-
     Profile profile(knxnetip_prof);
 //    LogMessage("packet flags: \e[38;5;161m0x%x\e[39m\n\n", p->packet_flags);
 
     // get policy
-    const knxnetip::module::policy* policy = knxnetip::module::get_policy(params, p);
+    const knxnetip::module::policy& policy{knxnetip::module::get_policy(params, p)};
 
     // decode packet
-    knxnetip::Packet knxp{knxnetip::packet::dissect(p)};
+    knxnetip::Packet knxp{};
+    if (!knxp.dissect(*p))
+    {
+        /*FIXIT: alert? */
 
-    // analyze packet
-    knxnetip::packet::detect(knxp, policy);
+    } else {
+        // analyze packet
+        knxnetip::packet::detect(knxp, policy);
+    }
 
     // peg counts
     knxnetip_stats.frames++;
@@ -159,16 +162,16 @@ static const InspectApi knxnetip_api =
     },
     IT_SERVICE,                         // InspectorType
     (uint16_t)PktType::PDU,             // packet type
-    nullptr,                            // exported buffers
+    nullptr,                           // exported buffers
     "knxnetip",                         // service
     knxnetip_init,                      // plugin init
-    nullptr,                            // cleanup pinit()
-    nullptr,                            // thread local init
-    nullptr,                            // cleanup thread local init
+    nullptr,                           // cleanup pinit()
+    nullptr,                           // thread local init
+    nullptr,                           // cleanup thread local init
     knxnetip_ctor,                      // instantiate inspector from `Module` data
     knxnetip_dtor,                      // release inspector instance
-    nullptr,                            // get new session tracker
-    nullptr                             // clear stats
+    nullptr,                           // get new session tracker
+    nullptr                            // clear stats
 };
 
 #ifdef BUILDING_SO
