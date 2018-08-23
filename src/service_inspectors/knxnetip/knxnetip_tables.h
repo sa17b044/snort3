@@ -19,28 +19,52 @@
 #ifndef KNXNETIP_TABLES_H
 #define KNXNETIP_TABLES_H
 
-//#include "framework/parameter.h"
 #include "framework/module.h"
-
-using namespace snort;
 
 namespace knxnetip {
 
-namespace module {
+    namespace module {
 
-extern const Parameter server_params[];
-extern const Parameter policy_params[];
-extern const Parameter params[];
+        extern const snort::Parameter server_params[];
+        extern const snort::Parameter policy_params[];
+        extern const snort::Parameter params[];
 
-extern const RuleMap events[];
-extern const PegInfo peg_names[];
-extern const RuleMap rules[];
+        extern const snort::RuleMap events[];
+        extern const PegInfo peg_names[];
+        extern const snort::RuleMap rules[];
+
+    }
 
 }
 
-}
+/* Protocol Header */
+#define KNXNETIP_HEAD_SIZE 1
+#define KNXNETIP_PROT_VERS 2
+#define KNXNETIP_TOTAL_LEN 3
+#define KNXNETIP_SRVC_TYPE 4
 
-#define KNXNETIP_DUMMY 1
+#define KNXNETIP_HEAD_SIZE_STR "invalid header size"
+#define KNXNETIP_PROT_VERS_STR "invalid protocol version"
+#define KNXNETIP_TOTAL_LEN_STR "total length of packet does not match received length"
+#define KNXNETIP_SRVC_TYPE_STR "invalid service type"
+
+/* Protocol Services */
+#define KNXNETIP_INDIV_ADDR 11
+#define KNXNETIP_INVALID_GROUP_ADDR 12
+#define KNXNETIP_SRVC 13
+
+#define KNXNETIP_INDIV_ADDR_STR "individual addressing"
+#define KNXNETIP_INVALID_GROUP_ADDR_STR "illegal group address"
+#define KNXNETIP_SRVC_STR "illegal service type"
+
+/* Group Address */
+#define KNXNETIP_GRPADDR_MAX 21
+#define KNXNETIP_GRPADDR_MIN 22
+
+#define KNXNETIP_GRPADDR_MAX_STR "value out of range (max)"
+#define KNXNETIP_GRPADDR_MIN_STR "value out of range (min)"
+
+#define KNXNETIP_DUMMY 100
 #define KNXNETIP_DUMMY_STR "knxnetip dummy rule"
 
 #endif /* KNXNETIP_TABLES_H */
