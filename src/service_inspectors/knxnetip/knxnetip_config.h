@@ -24,8 +24,6 @@
 #include "sfip/sf_ip.h"
 #include "protocols/packet.h"
 
-using namespace snort;
-
 namespace knxnetip {
     namespace module {
 
@@ -33,14 +31,15 @@ namespace knxnetip {
         {
             uint32_t dpt;
 
-            uint8_t max;
-            uint8_t min;
-            uint8_t frequency;
-            uint8_t duration;
+            double max;
+            double min;
+            double frequency;
+            double duration;
         };
 
         struct policy {
             bool individual_addressing = false;
+            bool inspection = true;
             bool payload = false;
             bool group_addressing = false;
             int group_address_level = 3;
@@ -53,7 +52,7 @@ namespace knxnetip {
         };
 
         struct server {
-            SfCidr cidr;
+            snort::SfCidr cidr;
             std::vector<int> ports;
             int policy;
         };
