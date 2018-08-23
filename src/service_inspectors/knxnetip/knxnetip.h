@@ -30,18 +30,18 @@ struct KNXnetIPStats
     PegCount frames;
 };
 
-class KNXnetIP : public Inspector
+class KNXnetIP : public snort::Inspector
 {
 public:
     KNXnetIP(const knxnetip::module::param *p);
     ~KNXnetIP();
 
-    bool configure(SnortConfig *) override;
-    void show(SnortConfig *) override;
+    bool configure(snort::SnortConfig *) override;
+    void show(snort::SnortConfig *) override;
 
-    bool likes(Packet *p) override;
-    void eval(Packet* p) override;
-    void clear(Packet* p) override;
+    bool likes(snort::Packet *p) override;
+    void eval(snort::Packet* p) override;
+    void clear(snort::Packet* p) override;
 
     void meta(int, const uint8_t *) override;
 
@@ -50,6 +50,7 @@ public:
 
 private:
     const knxnetip::module::param* const params;
+    const KNXnetIPModule* mod;
 };
 
 extern THREAD_LOCAL KNXnetIPStats knxnetip_stats;

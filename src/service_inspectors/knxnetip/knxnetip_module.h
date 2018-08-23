@@ -35,9 +35,9 @@ public:
     KNXnetIPModule();
     ~KNXnetIPModule() override;
 
-    bool begin(const char*, int, SnortConfig*) override;
-    bool set(const char*, Value&, SnortConfig*) override;
-    bool end(const char*, int, SnortConfig*) override;
+    bool begin(const char*, int, snort::SnortConfig*) override;
+    bool set(const char*, snort::Value&, snort::SnortConfig*) override;
+    bool end(const char*, int, snort::SnortConfig*) override;
 
     unsigned get_gid() const override
     { return GID_KNXNETIP; }
