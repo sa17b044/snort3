@@ -634,8 +634,10 @@ namespace knxnetip
 
                     uint8_t get_ctrl1() const { return *control_field_1; }
                     uint8_t get_ctrl2() const { return *control_field_2; }
-                    uint8_t get_source_addr() const { return ntohs(*source_address); }
-                    uint8_t get_destination_addr() const { return ntohs(*destination_address); }
+                    uint16_t get_source_addr() const { return ntohs(*source_address); }
+                    uint16_t get_destination_addr() const { return ntohs(*destination_address); }
+
+                    bool is_individual_address() const { return (get_ctrl2() && 0x80) == 0x00; }
                 };
 
                 class PollData
@@ -652,10 +654,12 @@ namespace knxnetip
 
                     uint8_t get_ctrl1() const { return *control_field_1; }
                     uint8_t get_ctrl2() const { return *control_field_2; }
-                    uint8_t get_source_addr() const { return ntohs(*source_address); }
-                    uint8_t get_destination_addr() const { return ntohs(*destination_address); }
+                    uint16_t get_source_addr() const { return ntohs(*source_address); }
+                    uint16_t get_destination_addr() const { return ntohs(*destination_address); }
                     uint8_t get_number_of_slots() const { return (*number_of_slots) & 0xf; }
                     uint8_t get_poll_data(int i) const { return i < 0 or i > get_number_of_slots() ? 0 : *(poll_data + i); }
+
+                    bool is_individual_address() const { return (get_ctrl2() && 0x80) == 0x00; }
                 };
 
                 class Raw
