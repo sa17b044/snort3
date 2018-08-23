@@ -19,6 +19,20 @@
 #ifndef KNXNETIP_DPT_H
 #define KNXNETIP_DPT_H
 
+#include "knxnetip_apdu.h"
 
+namespace knxnetip
+{
+
+    namespace dpt
+    {
+        bool is_dpt_higher(knxnetip::packet::cemi::apdu::GroupValue& gv, uint32_t dpt, double max);
+        bool is_dpt_lower(knxnetip::packet::cemi::apdu::GroupValue& gv, uint32_t dpt, double min);
+
+
+    }
+
+
+}
 
 #endif /* KNXNETIP_DPT_H */
