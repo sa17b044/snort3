@@ -29,9 +29,21 @@ struct Packet;
 
 namespace knxnetip {
 
-namespace packet {
-void detect(knxnetip::Packet& p, const knxnetip::module::policy& policy);
-}
+    void queue_event(const knxnetip::module::policy& policy, unsigned sid);
+    void queue_event(unsigned sid);
+
+    namespace detection {
+        enum class Comp : uint8_t
+        {
+            lower = 0x00,
+            higher = 0x01
+        };
+
+        void detect(knxnetip::Packet& p, const knxnetip::module::policy& policy);
+        bool is_individual_address(knxnetip::Packet& p);
+        bool is_invalid_group_address(knxnetip::Packet& p, const knxnetip::module::policy& policy);
+        bool out_of_bound(knxnetip::Packet& p, const knxnetip::module::policy& policy, Comp comp);
+    }
 
 }
 #endif /* KNXNETIP_DETECT_H */

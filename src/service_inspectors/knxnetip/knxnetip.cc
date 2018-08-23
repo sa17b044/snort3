@@ -86,13 +86,13 @@ void KNXnetIP::eval(Packet *p)
 
     // decode packet
     knxnetip::Packet knxp{};
-    if (!knxp.dissect(*p))
+    if (!knxp.dissect(*p, policy))
     {
         /*FIXIT: alert? */
 
     } else {
         // analyze packet
-        knxnetip::packet::detect(knxp, policy);
+        knxnetip::detection::detect(knxp, policy);
     }
 
     // peg counts

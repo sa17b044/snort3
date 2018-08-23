@@ -25,8 +25,9 @@
 #include "knxnetip_module.h"
 #include "knxnetip_packet.h"
 #include "knxnetip_tables.h"
+#include "knxnetip_detect.h"
 
-bool knxnetip::Packet::dissect(const snort::Packet& p)
+bool knxnetip::Packet::dissect(const snort::Packet& p, const knxnetip::module::policy& policy)
 {
 
     /* Lay the header struct over the payload */
@@ -35,14 +36,12 @@ bool knxnetip::Packet::dissect(const snort::Packet& p)
 
     if (h->get_length() != knxnetip::HEADER_SIZE)
     {
-        /*FIXME: alert */
-        DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_DUMMY);
+        knxnetip::queue_event(policy, KNXNETIP_HEAD_SIZE);
         return false;
     } /* FIXIT-L: else? */
     if (h->get_total_length() != p.dsize)
     {
-        /*FIXME: alert */
-        DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_DUMMY);
+        knxnetip::queue_event(policy, KNXNETIP_TOTAL_LEN);
         return false;
     }
 
@@ -124,7 +123,7 @@ bool knxnetip::Packet::dissect(const snort::Packet& p)
                 routing_busy.load(p, offset);
                 break;
 
-                /* KNXnet/IP Remote Diagnosis and Configuration */
+            /* KNXnet/IP Remote Diagnosis and Configuration */
             case knxnetip::ServiceType::REMOTE_DIAG_REQ:
                 rem_diag_request.load(p, offset);
                 break;
@@ -142,10 +141,8 @@ bool knxnetip::Packet::dissect(const snort::Packet& p)
                 break;
 
             default:
-                /*FIXME: alert */
-                DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_DUMMY);
+                knxnetip::queue_event(policy, KNXNETIP_SRVC_TYPE);
                 return false;
-
         }
 
     }
@@ -184,16 +181,19 @@ bool knxnetip::Packet::dissect(const snort::Packet& p)
                 break;
 
             default:
-                /*FIXME: alert */
-                DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_DUMMY);
+                knxnetip::queue_event(policy, KNXNETIP_SRVC_TYPE);
                 return false;
         }
     }
+    else
+    {
+        knxnetip::queue_event(policy, KNXNETIP_PROT_VERS);
+        return false;
+    }
 
-    /*FIXME: alert */
     if (p.dsize != offset)
     {
-        DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_DUMMY);
+        knxnetip::queue_event(policy, KNXNETIP_DUMMY);
         return false;
     }
 
