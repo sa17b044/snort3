@@ -29,6 +29,7 @@ namespace knxnetip
             constexpr static auto valid_line {R"###(<GroupAddress .*?\/?>)###"};
             constexpr static auto valid_address {R"###(Address="(.*?)")###"};
             constexpr static auto valid_dpt {R"###(DPTs="(.*?)")###"};
+
         }
 
         namespace csv {
@@ -42,6 +43,10 @@ namespace knxnetip
 
         constexpr static auto cidr {R"###((\d+)\.(\d+)\.(\d+)\.(\d+)\/(\d+))###"};
         constexpr static auto file_ext {R"###(\.([[:alpha:]]+)$)###"};
+
+
+        constexpr static auto valid_dpt_max {R"###(max[:=]"([+-]?\d+(?:.\d+)?)")###"};
+        constexpr static auto valid_dpt_min {R"###(min[:=]"([+-]?\d+(?:.\d+)?)")###"};
     }
 }
 

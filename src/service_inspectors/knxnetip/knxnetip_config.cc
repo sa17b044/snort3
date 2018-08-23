@@ -28,12 +28,15 @@
 #include "knxnetip_enum.h"
 #include "knxnetip_regex.h"
 
+using namespace snort;
+
 bool knxnetip::module::policy::load_group_addr(void)
 {
     bool result = false;
     std::smatch m;
 
-    LogMessage("file: %s\n", group_address_file.c_str());
+    /*FIXME: remove */
+//    LogMessage("file: %s\n", group_address_file.c_str());
 
     /* extract file extension */
     std::string ext;
@@ -109,6 +112,7 @@ bool knxnetip::module::policy::load_group_addr(void)
         {
             uint16_t g{0};
             uint32_t dpt{0};
+            double max{0}, min{0};
 
             /* validate and convert group address */
             if (group_address_level == 2)
@@ -171,6 +175,19 @@ bool knxnetip::module::policy::load_group_addr(void)
                 }
             }
 
+            /* validate and convert maxima and minima */
+            std::regex rdptmax{knxnetip::regex::valid_dpt_max};
+            if (std::regex_search(line, m, rdptmax))
+            {
+                max = std::stod(m[1].str());
+            }
+
+            std::regex rdptmin{knxnetip::regex::valid_dpt_min};
+            if (std::regex_search(line, m, rdptmin))
+            {
+                min = std::stod(m[1].str());
+            }
+
             /* Add converted values */
             if (g == 0)
             {
@@ -186,8 +203,8 @@ bool knxnetip::module::policy::load_group_addr(void)
             {
                 Spec d{};
                 d.dpt = dpt;
-                d.max = 0;
-                d.min = 0;
+                d.max = max;
+                d.min = min;
                 d.frequency = 0;
                 d.duration = 0;
 
