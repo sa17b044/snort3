@@ -48,6 +48,7 @@ knxnetip =
     {
         {
             individual_addressing = true,
+            inspection = true,
             services = 
             {
                 'SEARCH_REQUEST',
@@ -66,7 +67,7 @@ knxnetip =
                 'knx2_service3'
             },
             group_addressing = false,
-            group_address_level = 2,
+            group_address_level = 3,
             group_address_file = 'etc/knxnetip/group_address.csv'
         },
         {
