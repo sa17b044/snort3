@@ -142,6 +142,10 @@ bool KNXnetIPModule::set(const char *fqn, Value& val, SnortConfig *sc)
 		{
 			pworker->individual_addressing = val.get_bool();
 		}
+		else if (val.is("inspection"))
+		{
+		    pworker->inspection = val.get_bool();
+		}
 		else if (val.is("payload"))
 		{
 			pworker->payload = val.get_bool();

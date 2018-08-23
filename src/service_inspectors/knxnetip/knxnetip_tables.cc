@@ -22,7 +22,9 @@
 
 #include "knxnetip_tables.h"
 
-const Parameter knxnetip::module::server_params[] =
+using namespace snort;
+
+const snort::Parameter knxnetip::module::server_params[] =
 {
     {"cidr", Parameter::PT_STRING, nullptr, "0.0.0.0/32", "server ip address (CIDR notation)"},
     {"port", Parameter::PT_PORT, "1:", "3671", "server port number(s)"},
@@ -32,7 +34,8 @@ const Parameter knxnetip::module::server_params[] =
 
 const Parameter knxnetip::module::policy_params[] =
 {
-    {"individual_addressing",Parameter::PT_BOOL,nullptr, "false", "individual addressing detection"},
+    {"individual_addressing",Parameter::PT_BOOL, nullptr, "false", "individual addressing detection"},
+    {"inspection", Parameter::PT_BOOL, nullptr, "true", "protocol inspection/validation"},
     // print services
     {"services", Parameter::PT_STRING, nullptr, nullptr, "service detection"},
     // FIXIT-S: change to PT_IMPLIED
@@ -64,6 +67,19 @@ const PegInfo knxnetip::module::peg_names[] =
 };
 
 const RuleMap knxnetip::module::rules[] = {
+    /* Protocol Header */
+    { KNXNETIP_HEAD_SIZE, KNXNETIP_HEAD_SIZE_STR },
+    { KNXNETIP_PROT_VERS, KNXNETIP_PROT_VERS_STR },
+    { KNXNETIP_TOTAL_LEN, KNXNETIP_TOTAL_LEN_STR },
+    { KNXNETIP_SRVC_TYPE, KNXNETIP_SRVC_TYPE_STR },
+    /* Protocol Services */
+    { KNXNETIP_INDIV_ADDR, KNXNETIP_INDIV_ADDR_STR },
+    { KNXNETIP_INVALID_GROUP_ADDR, KNXNETIP_INVALID_GROUP_ADDR_STR },
+    { KNXNETIP_SRVC, KNXNETIP_SRVC_STR },
+    /* Group Address */
+    { KNXNETIP_GRPADDR_MAX, KNXNETIP_GRPADDR_MAX_STR },
+    { KNXNETIP_GRPADDR_MIN, KNXNETIP_GRPADDR_MIN_STR },
+//    { KNXNETIP_HEAD
     { KNXNETIP_DUMMY, KNXNETIP_DUMMY_STR },
     { 0, nullptr }
 };
