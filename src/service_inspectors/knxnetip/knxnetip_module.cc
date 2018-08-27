@@ -100,11 +100,9 @@ bool KNXnetIPModule::set(const char *fqn, Value& val, SnortConfig *sc)
 	{
 	    knxnetip::module::server *sworker = &params.servers.back();
 
-		if (val.is("cidr"))
+		if (val.is("from") or val.is("to"))
 		{
-			unsigned n;
-			std::string s((char *)val.get_buffer(n));
-
+			std::string s{val.get_string()};
 			std::regex r {knxnetip::regex::cidr};
 			std::smatch m;
 
@@ -115,12 +113,26 @@ bool KNXnetIPModule::set(const char *fqn, Value& val, SnortConfig *sc)
 			   m[4].matched and std::stoul(m[4].str()) <= 255 and
 			   m[5].matched and std::stoul(m[5].str()) <= 32)
 			{
-			    sworker->cidr.set(s.c_str());
+			    if (val.is("from"))
+			    {
+                    sworker->from.set(s.c_str());
+			    }
+			    else if (val.is("to"))
+			    {
+			        sworker->to.set(s.c_str());
+			    }
 			}
 			else
 			{
                 LogMessage("ERROR: invalid ip address '%s'\n", s.c_str());
-                sworker->cidr.set("0.0.0.0/32");
+                if (val.is("from"))
+                {
+                    sworker->from.set("0.0.0.0/32");
+                }
+                else if (val.is("to"))
+                {
+                    sworker->to.set("0.0.0.0/32");
+                }
 			}
 		}
 		else if (val.is("port"))
@@ -129,8 +141,16 @@ bool KNXnetIPModule::set(const char *fqn, Value& val, SnortConfig *sc)
 		}
 		else if (val.is("policy"))
 		{
-			sworker->policy = val.get_long() - 1;
+			sworker->policy = val.get_long();
 		}
+		else if (val.is("log_knxnetip"))
+		{
+		    sworker->log_knxnetip = val.get_bool();
+		}
+        else if (val.is("log_to_file"))
+        {
+            sworker->log_to_file = val.get_bool();
+        }
 	}
 
 	// policy
@@ -146,13 +166,17 @@ bool KNXnetIPModule::set(const char *fqn, Value& val, SnortConfig *sc)
 		{
 		    pworker->inspection = val.get_bool();
 		}
+		else if (val.is("header"))
+		{
+		    pworker->header = val.get_bool();
+		}
 		else if (val.is("payload"))
 		{
 			pworker->payload = val.get_bool();
 		}
-		else if (val.is("group_addressing"))
+		else if (val.is("detection"))
 		{
-			pworker->group_addressing = val.get_bool();
+			pworker->detection = val.get_bool();
 		}
 		else if (val.is("group_address_level"))
 		{
@@ -160,19 +184,16 @@ bool KNXnetIPModule::set(const char *fqn, Value& val, SnortConfig *sc)
 		}
 		else if (val.is("group_address_file"))
 		{
-			unsigned n;
-			const uint8_t *b = val.get_buffer(n);
-			pworker->group_address_file.assign((const char *)b, n);
+			pworker->group_address_file.assign(val.get_string());
 		}
 		else if (val.is("services"))
 		{
-			unsigned n;
-			const uint8_t *b = val.get_buffer(n);
-			std::string s;
-			s.assign((const char *)b, n);
-			pworker->services.push_back(s);
+			pworker->services.push_back(val.get_string());
 		}
-
+		else if (val.is("app_services"))
+		{
+		    pworker->app_services.push_back(val.get_string());
+		}
 	}
 	return true;
 }
@@ -184,7 +205,6 @@ bool KNXnetIPModule::end(const char *fqn, int idx, SnortConfig *)
 	{
 		if (!knxnetip::module::validate(params))
 		{
-			// FIXIT-L: Replace with proper snort message handling.
 			LogMessage("ERROR: knxnetip configuration failed\n");
 
 			// Fatal configuration.
