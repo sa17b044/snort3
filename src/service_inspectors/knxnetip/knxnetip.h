@@ -28,29 +28,34 @@
 struct KNXnetIPStats
 {
     PegCount frames;
+    PegCount valid_frames;
+    PegCount illegal_services;
+    PegCount individual_address;
+    PegCount illegal_app_services;
+    PegCount illegal_group_address;
+    PegCount extremas;
 };
 
 class KNXnetIP : public snort::Inspector
 {
 public:
-    KNXnetIP(const knxnetip::module::param *p);
+    KNXnetIP(knxnetip::module::param *p);
     ~KNXnetIP();
 
-    bool configure(snort::SnortConfig *) override;
-    void show(snort::SnortConfig *) override;
+    // bool configure(snort::SnortConfig *) override;
+    // void show(snort::SnortConfig *) override;
 
     bool likes(snort::Packet *p) override;
     void eval(snort::Packet* p) override;
-    void clear(snort::Packet* p) override;
+    // void clear(snort::Packet* p) override;
 
-    void meta(int, const uint8_t *) override;
+    // void meta(int, const uint8_t *) override;
 
-    int get_message_type(int version, const char* name);
-    int get_info_type(int version, const char* name);
+    // int get_message_type(int version, const char* name);
+    // int get_info_type(int version, const char* name);
 
 private:
-    const knxnetip::module::param* const params;
-    const KNXnetIPModule* mod;
+    knxnetip::module::param* params;
 };
 
 extern THREAD_LOCAL KNXnetIPStats knxnetip_stats;

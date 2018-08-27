@@ -29,6 +29,7 @@
 #include "detection/detection_engine.h"
 #include "profiler/profiler.h"
 #include "log/messages.h"
+#include "log/text_log.h"
 
 using namespace snort;
 
@@ -37,40 +38,41 @@ THREAD_LOCAL KNXnetIPStats knxnetip_stats;
 //-------------------------------------------------------------------------
 // class stuff
 //-------------------------------------------------------------------------
-KNXnetIP::KNXnetIP(const knxnetip::module::param* p) : params(p)
+KNXnetIP::KNXnetIP(knxnetip::module::param* p) : params(p)
 { }
 
 KNXnetIP::~KNXnetIP()
 { }
 
-bool KNXnetIP::configure(SnortConfig *sc)
-{
-    int i = 0;
+//bool KNXnetIP::configure(SnortConfig *sc)
+//{
+//    return true;
+//}
 
-    return true;
-}
-
-void KNXnetIP::show(SnortConfig *sc)
-{
-
-    int i = 0;
-}
+//void KNXnetIP::show(SnortConfig *sc)
+//{
+//    return true;
+//}
 
 bool KNXnetIP::likes(Packet *p)
 {
-    return true;
-
     if(!p->has_udp_data()) {
         return false;
     }
 
-    if(knxnetip::module::has_policy(params, p)) {
-        return false;
+    if (params->global_policy > 0) {
+        return true;
     }
 
-    // check if KNXnet/IP
+    const knxnetip::module::server* s = knxnetip::module::get_server_src(params, p);
+    if (s != nullptr) {
+        return true;
+    }
 
-    // check if auto detect
+    s = knxnetip::module::get_server_dst(params, p);
+    if (s != nullptr) {
+        return true;
+    }
 
     return true;
 }
@@ -78,47 +80,54 @@ bool KNXnetIP::likes(Packet *p)
 
 void KNXnetIP::eval(Packet *p)
 {
-    Profile profile(knxnetip_prof);
-//    LogMessage("packet flags: \e[38;5;161m0x%x\e[39m\n\n", p->packet_flags);
-
-    // get policy
-    const knxnetip::module::policy& policy{knxnetip::module::get_policy(params, p)};
-
-    // decode packet
     knxnetip::Packet knxp{};
-    if (!knxp.dissect(*p, policy))
-    {
-        /*FIXIT: alert? */
+    Profile profile(knxnetip_prof);
 
-    } else {
+    knxnetip::module::server* server;
+    const knxnetip::module::policy* policy;
+
+    // get server config
+    if (knxnetip::module::get_server_src(params, p) != nullptr)
+    {
+        server = knxnetip::module::get_server_src(params, p);
+        policy = knxnetip::module::get_policy_src(params, p);
+    }
+    else
+    {
+        server = knxnetip::module::get_server_dst(params, p);
+        policy = knxnetip::module::get_policy_dst(params, p);
+    }
+
+    knxnetip::module::open_log(*server);
+
+    // dissect packet
+    if (policy != nullptr and knxp.dissect(*p, *server, *policy))
+    {
         // analyze packet
-        knxnetip::detection::detect(knxp, policy);
+        knxnetip::detection::detect(*p, knxp, *server, *policy);
+        knxnetip_stats.valid_frames++;
     }
 
     // peg counts
     knxnetip_stats.frames++;
-
+    knxnetip::module::close_log(*server);
 }
 
-void KNXnetIP::clear(Packet *p)
-{
-    int i = 0;
-}
+//void KNXnetIP::clear(Packet *p)
+//{ }
 
-void KNXnetIP::meta(int i, const uint8_t *d)
-{
-    int ii = 0;
-}
+//void KNXnetIP::meta(int i, const uint8_t *d)
+//{ }
 
-int KNXnetIP::get_message_type(int version, const char *name)
-{
-    return 0;
-}
-
-int KNXnetIP::get_info_type(int version, const char *name)
-{
-    return 0;
-}
+//int KNXnetIP::get_message_type(int version, const char *name)
+//{
+//    return 0;
+//}
+//
+//int KNXnetIP::get_info_type(int version, const char *name)
+//{
+//    return 0;
+//}
 
 //-------------------------------------------------------------------------
 // api/plugin stuff
