@@ -43,7 +43,7 @@ stream_udp = { }
 
 knxnetip = 
 { 
-    global_policy = 1,
+    -- global_policy = 0,
     policies =
     {
         {
@@ -54,9 +54,16 @@ knxnetip =
                 'SEARCH_REQUEST',
                 'DESCRIPTION_REQUEST'
             },
-            group_addressing = true,
+            app_services =
+            {
+                'A_IndividualAddress_Write',
+                'A_IndividualAddress_Read'
+            },
+            detection = true,
             group_address_level = 3,
-            group_address_file = 'etc/knxnetip/group_address.xml'
+            group_address_file = 'etc/knxnetip/group_address.xml',
+            payload = true,
+            header = true
         },
         {
             individual_addressing = false,
@@ -66,7 +73,7 @@ knxnetip =
                 'CONNECT_REQUEST',
                 'knx2_service3'
             },
-            group_addressing = false,
+            detection = false,
             group_address_level = 3,
             group_address_file = 'etc/knxnetip/group_address.csv'
         },
@@ -78,23 +85,35 @@ knxnetip =
                 'CONNECT_REQUEST',
                 'knx2_service3'
             },
-            group_addressing = false,
+            detection = false,
             group_address_file = '/home/alija/Documents/group_address3.esf'
         }
     },
     servers = 
     {
         {
-            cidr = '172.22.10.76/32',
+            from = '172.22.10.76/32',
             port = 
             {
                 3671,
                 3672
             },
-            policy = 1
+            policy = 1,
+            log_knxnetip = true,
+            log_to_file = false,
         },
         {
-            cidr = '192.164.1.2/16',
+            to = '172.22.10.76/32',
+            port = 
+            {
+                3671,
+                3672
+            },
+            policy = 1,
+            log_to_file = false,
+        },
+        {
+            from = '192.164.1.2/16',
             port = 3672,
             policy = 2
         }
@@ -109,20 +128,20 @@ binder =
 {
     -- { when = { proto = 'udp', ports = '3671' }, use = { type = 'knxnetip' } },
     { when = { proto = 'any', ports = 'any' }, use = { type = 'knxnetip' } },
-    { when = { service = 'knxnetip' },         use = { type = 'knxnetip' } }
+    -- { when = { service = 'knxnetip' },         use = { type = 'knxnetip' } }
 }
 
 ---------------------------------------------------------------------------
 -- 5. configure performance
 ---------------------------------------------------------------------------
 
-perf_monitor = 
-{
-    modules = {},
-    flow = true,
-    flow_ip = true,
-    cpu = true
-}
+-- perf_monitor = 
+-- {
+--     modules = {},
+--     flow = true,
+--     flow_ip = true,
+--     cpu = true
+-- }
 
 ---------------------------------------------------------------------------
 -- 6. configure detection
@@ -149,4 +168,42 @@ ips =
 -- 8. configure outputs
 ---------------------------------------------------------------------------
 
-
+-- event logging
+-- you can enable with defaults from the command line with -A <alert_type>
+-- uncomment below to set non-default configs
+alert_csv = 
+{
+    file = true,
+    fields = { action, class, gid }
+}
+alert_fast = 
+{
+    file = true,
+    packet = true
+}
+alert_full = 
+{
+    file = true,
+}
+alert_sfsocket = { }
+alert_syslog = { }
+unified2 = { }
+--  packet logging
+-- you can enable with defaults from the command line with -L <log_type>
+log_codecs = { 
+    file = true,
+    msg = true
+}
+log_hext = 
+{
+    file = true,
+    raw = true
+}
+log_pcap = { }
+--  additional logs
+packet_capture = { }
+file_log =
+{
+    log_pkt_time = true,
+    log_sys_time = true,
+}
