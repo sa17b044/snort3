@@ -437,7 +437,7 @@ namespace knxnetip
             packet::SecureGroupSyncResponse sec_group_sync_response;
         };
 
-        bool dissect(const snort::Packet& p, const knxnetip::module::policy& policy);
+        bool dissect(const snort::Packet& p, const knxnetip::module::server& server, const knxnetip::module::policy& policy);
     };
 
 }

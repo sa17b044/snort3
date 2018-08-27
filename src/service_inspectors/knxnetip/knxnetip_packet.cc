@@ -27,21 +27,23 @@
 #include "knxnetip_tables.h"
 #include "knxnetip_detect.h"
 
-bool knxnetip::Packet::dissect(const snort::Packet& p, const knxnetip::module::policy& policy)
+bool knxnetip::Packet::dissect(const snort::Packet& p, const knxnetip::module::server& server, const knxnetip::module::policy& policy)
 {
+    using knxnetip::packet::Header;
+    using knxnetip::ServiceType;
 
     /* Lay the header struct over the payload */
-    h = (const knxnetip::packet::Header*)p.data;
+    h = (const Header*)p.data;
     int offset = knxnetip::HEADER_SIZE;
 
     if (h->get_length() != knxnetip::HEADER_SIZE)
     {
-        knxnetip::queue_event(policy, KNXNETIP_HEAD_SIZE);
+        knxnetip::queue_event(KNXNETIP_HEAD_SIZE, p, server, policy);
         return false;
-    } /* FIXIT-L: else? */
+    }
     if (h->get_total_length() != p.dsize)
     {
-        knxnetip::queue_event(policy, KNXNETIP_TOTAL_LEN);
+        knxnetip::queue_event(KNXNETIP_TOTAL_LEN, p, server, policy);
         return false;
     }
 
@@ -52,96 +54,96 @@ bool knxnetip::Packet::dissect(const snort::Packet& p, const knxnetip::module::p
         switch(h->get_service_type())
         {
             /* KNXnet/IP Core */
-            case knxnetip::ServiceType::SEARCH_REQ:
+            case ServiceType::SEARCH_REQ:
                 search_request.load(p, offset);
                 break;
 
-            case knxnetip::ServiceType::SEARCH_RES:
+            case ServiceType::SEARCH_RES:
                 search_response.load(p, offset);
                 break;
 
-            case knxnetip::ServiceType::DESCRIPTION_REQ:
+            case ServiceType::DESCRIPTION_REQ:
                 description_request.load(p, offset);
                 break;
 
-            case knxnetip::ServiceType::DESCRIPTION_RES:
+            case ServiceType::DESCRIPTION_RES:
                 description_response.load(p, offset, h->get_body_length());
                 break;
 
-            case knxnetip::ServiceType::CONNECT_REQ:
+            case ServiceType::CONNECT_REQ:
                 connect_request.load(p, offset);
                 break;
 
-            case knxnetip::ServiceType::CONNECT_RES:
+            case ServiceType::CONNECT_RES:
                 connect_response.load(p, offset);
                 break;
 
-            case knxnetip::ServiceType::CONNECTIONSTATE_REQ:
+            case ServiceType::CONNECTIONSTATE_REQ:
                 connection_state_request.load(p, offset);
                 break;
 
-            case knxnetip::ServiceType::CONNECTIONSTATE_RES:
+            case ServiceType::CONNECTIONSTATE_RES:
                 connection_state_response.load(p, offset);
                 break;
 
-            case knxnetip::ServiceType::DISCONNECT_REQ:
+            case ServiceType::DISCONNECT_REQ:
                 disconnect_request.load(p, offset);
                 break;
 
-            case knxnetip::ServiceType::DISCONNECT_RES:
+            case ServiceType::DISCONNECT_RES:
                 disconnect_response.load(p, offset);
                 break;
 
             /* KNXnet/IP Device Management */
-            case knxnetip::ServiceType::DEVICE_CONFIGURATION_REQ:
+            case ServiceType::DEVICE_CONFIGURATION_REQ:
                 device_conf_request.load(p, offset, h->get_body_length());
                 break;
 
-            case knxnetip::ServiceType::DEVICE_CONFIGURATION_ACK:
+            case ServiceType::DEVICE_CONFIGURATION_ACK:
                 device_conf_acknowledge.load(p, offset);
                 break;
 
             /* KNXnet/IP Tunnelling */
-            case knxnetip::ServiceType::TUNNELLING_REQ:
+            case ServiceType::TUNNELLING_REQ:
                 tunnelling_request.load(p, offset, h->get_body_length());
                 break;
 
-            case knxnetip::ServiceType::TUNNELLING_ACK:
+            case ServiceType::TUNNELLING_ACK:
                 tunnelling_acknowledge.load(p, offset);
                 break;
 
             /* KNXnet/IP Routing */
-            case knxnetip::ServiceType::ROUTING_INDICATION:
+            case ServiceType::ROUTING_INDICATION:
                 routing_indication.load(p, offset, h->get_body_length());
                 break;
 
-            case knxnetip::ServiceType::ROUTING_LOST:
+            case ServiceType::ROUTING_LOST:
                 routing_lost.load(p, offset);
                 break;
 
-            case knxnetip::ServiceType::ROUTING_BUSY:
+            case ServiceType::ROUTING_BUSY:
                 routing_busy.load(p, offset);
                 break;
 
             /* KNXnet/IP Remote Diagnosis and Configuration */
-            case knxnetip::ServiceType::REMOTE_DIAG_REQ:
+            case ServiceType::REMOTE_DIAG_REQ:
                 rem_diag_request.load(p, offset);
                 break;
 
-            case knxnetip::ServiceType::REMOTE_DIAG_RES:
+            case ServiceType::REMOTE_DIAG_RES:
                 rem_diag_response.load(p, offset, h->get_body_length());
                 break;
 
-            case knxnetip::ServiceType::REMOTE_BASIC_CONF_REQ:
+            case ServiceType::REMOTE_BASIC_CONF_REQ:
                 rem_basic_conf_request.load(p, offset, h->get_body_length());
                 break;
 
-            case knxnetip::ServiceType::REMOTE_RESET_REQ:
+            case ServiceType::REMOTE_RESET_REQ:
                 rem_reset_request.load(p, offset);
                 break;
 
             default:
-                knxnetip::queue_event(policy, KNXNETIP_SRVC_TYPE);
+                knxnetip::queue_event(KNXNETIP_SRVC_TYPE, p, server, policy);
                 return false;
         }
 
@@ -152,48 +154,48 @@ bool knxnetip::Packet::dissect(const snort::Packet& p, const knxnetip::module::p
         switch(h->get_service_type())
         {
             /* KNXnet/IP Secure */
-            case knxnetip::ServiceType::SECURE_WRAPPER:
+            case ServiceType::SECURE_WRAPPER:
                 sec_wrapper.load(p, offset);
                 break;
 
-            case knxnetip::ServiceType::SECURE_CHANNEL_REQ:
+            case ServiceType::SECURE_CHANNEL_REQ:
                 sec_chan_request.load(p, offset);
                 break;
 
-            case knxnetip::ServiceType::SECURE_CHANNEL_RES:
+            case ServiceType::SECURE_CHANNEL_RES:
                 sec_chan_response.load(p, offset);
                 break;
 
-            case knxnetip::ServiceType::SECURE_CHANNEL_AUTH:
+            case ServiceType::SECURE_CHANNEL_AUTH:
                 sec_chan_authorize.load(p, offset);
                 break;
 
-            case knxnetip::ServiceType::SECURE_CHANNEL_STAT:
+            case ServiceType::SECURE_CHANNEL_STAT:
                 sec_chan_status.load(p, offset);
                 break;
 
-            case knxnetip::ServiceType::SECURE_GROUP_SYNC_REQ:
+            case ServiceType::SECURE_GROUP_SYNC_REQ:
                 sec_group_sync_request.load(p, offset);
                 break;
 
-            case knxnetip::ServiceType::SECURE_GROUP_SYNC_RES:
+            case ServiceType::SECURE_GROUP_SYNC_RES:
                 sec_group_sync_response.load(p, offset);
                 break;
 
             default:
-                knxnetip::queue_event(policy, KNXNETIP_SRVC_TYPE);
+                knxnetip::queue_event(KNXNETIP_SRVC_TYPE, p, server, policy);
                 return false;
         }
     }
     else
     {
-        knxnetip::queue_event(policy, KNXNETIP_PROT_VERS);
+        knxnetip::queue_event(KNXNETIP_PROT_VERS, p, server, policy);
         return false;
     }
 
     if (p.dsize != offset)
     {
-        knxnetip::queue_event(policy, KNXNETIP_DUMMY);
+        knxnetip::queue_event(KNXNETIP_DUMMY, p, server, policy);
         return false;
     }
 
@@ -463,8 +465,12 @@ void knxnetip::packet::SecureChannelRequest::load(const snort::Packet& p, int& o
 void knxnetip::packet::SecureChannelResponse::load(const snort::Packet& p, int& offset)
 {
     knxnetip::util::get(secure_channel_index, p.data, offset, p.dsize);
-    knxnetip::util::get(server_public_value, p.data, offset, p.dsize, pub_val_size);
-    knxnetip::util::get(message_auth_code, p.data, offset, p.dsize, msg_aut_size);
+
+    if (get_secure_channel_index() != 0)
+    {
+        knxnetip::util::get(server_public_value, p.data, offset, p.dsize, pub_val_size);
+        knxnetip::util::get(message_auth_code, p.data, offset, p.dsize, msg_aut_size);
+    }
 }
 
 void knxnetip::packet::SecureChannelAuthorize::load(const snort::Packet& p, int& offset)
