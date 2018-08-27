@@ -21,6 +21,8 @@
 
 #include <arpa/inet.h>
 #include <cstdint>
+#include <map>
+#include <string>
 #include "protocols/packet.h"
 
 namespace knxnetip
@@ -110,10 +112,12 @@ namespace knxnetip
                     A_FileStream_InfoReport = 0x3f0
                 };
 
+                extern std::map<Type, std::string> app_service_identifier;
+
                 class GroupValue
                 {
-                    const uint8_t* data;
                 public:
+                    const uint8_t* data;
                     uint8_t length;
                     void load(const snort::Packet& p, int& offset, apdu::Type t, uint8_t information_length);
 
@@ -429,7 +433,6 @@ namespace knxnetip
                     bool is_sending() const { return ((*flags) & 0x1) == 0x1; }
                     uint8_t get_group_address_list(int i) const { return i < 0 or i > length/2 ? 0 : ntohs(*(group_address_list + i)); }
                 };
-
 
                 class DomainAddressSerialNumber
                 {
