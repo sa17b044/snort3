@@ -27,6 +27,7 @@
 #include "knxnetip_config.h"
 #include "knxnetip_enum.h"
 #include "knxnetip_regex.h"
+#include "knxnetip_apdu.h"
 
 using namespace snort;
 
@@ -34,9 +35,6 @@ bool knxnetip::module::policy::load_group_addr(void)
 {
     bool result = false;
     std::smatch m;
-
-    /*FIXME: remove */
-//    LogMessage("file: %s\n", group_address_file.c_str());
 
     /* extract file extension */
     std::string ext;
@@ -111,8 +109,7 @@ bool knxnetip::module::policy::load_group_addr(void)
         if (valid)
         {
             uint16_t g{0};
-            uint32_t dpt{0};
-            double max{0}, min{0};
+            Spec d{};
 
             /* validate and convert group address */
             if (group_address_level == 2)
@@ -171,7 +168,8 @@ bool knxnetip::module::policy::load_group_addr(void)
                 }
                 else
                 {
-                    dpt = (range << 16) | unit;
+                    d.set_state(Spec::State::DPT);
+                    d.dpt = (range << 16) | unit;
                 }
             }
 
@@ -179,13 +177,13 @@ bool knxnetip::module::policy::load_group_addr(void)
             std::regex rdptmax{knxnetip::regex::valid_dpt_max};
             if (std::regex_search(line, m, rdptmax))
             {
-                max = std::stod(m[1].str());
+                d.max = std::stod(m[1].str());
             }
 
             std::regex rdptmin{knxnetip::regex::valid_dpt_min};
             if (std::regex_search(line, m, rdptmin))
             {
-                min = std::stod(m[1].str());
+                d.min = std::stod(m[1].str());
             }
 
             /* Add converted values */
@@ -194,20 +192,13 @@ bool knxnetip::module::policy::load_group_addr(void)
                 LogMessage("ERROR: invalid group address: %s\n", m[1].str().c_str());
             }
 
-            if (dpt == 0)
+            if (d.dpt == 0)
             {
                 LogMessage("ERROR: invalid data point type: %s\n", m[1].str().c_str());
             }
 
-            if (g != 0 and dpt != 0)
+            if (g != 0)
             {
-                Spec d{};
-                d.dpt = dpt;
-                d.max = max;
-                d.min = min;
-                d.frequency = 0;
-                d.duration = 0;
-
                 group_addresses.insert(std::pair<uint16_t,Spec>(g, d));
             }
         }
@@ -216,7 +207,14 @@ bool knxnetip::module::policy::load_group_addr(void)
     return result;
 }
 
-bool knxnetip::module::validate(param& params) {
+bool knxnetip::module::validate(param& params)
+{
+    // check if at least one server configuration is available, if not, create default one.
+    if (params.policies.size() == 0)
+    {
+        knxnetip::module::policy p {};
+        params.policies.push_back(p);
+    }
 
     // validate server configuration
     for (int i = 0; i < params.servers.size(); i++)
@@ -224,7 +222,7 @@ bool knxnetip::module::validate(param& params) {
         server& s{params.servers[i]};
 
         // policy number
-        if (s.policy < 0 or s.policy > (params.policies.size()-1))
+        if (s.policy < 0 or s.policy > params.policies.size())
         {
             LogMessage("ERROR: invalid policy '%d' at server[%d]\n", s.policy+1, i+1);
             return false;
@@ -232,12 +230,19 @@ bool knxnetip::module::validate(param& params) {
 
     }
 
-    // validate policy configuration
-    for (int i = 0; i < params.policies.size(); i++)
+    // check if at least one policy is available, if not, create default one.
+    if (params.policies.size() == 0)
     {
-        policy& p{params.policies[i]};
+        knxnetip::module::policy p {};
+        params.policies.push_back(p);
+    }
 
+    // validate policy configuration
+    for (auto& p : params.policies)
+    {
         // group address file
+        if (p.group_address_file.empty()) continue;
+
         std::ifstream ifile(p.group_address_file.c_str());
         if (!ifile)
         {
@@ -245,10 +250,21 @@ bool knxnetip::module::validate(param& params) {
             p.group_address_file.clear();
         }
 
+    }
+
+    return true;
+}
+
+bool knxnetip::module::load(param& params)
+{
+    // server
+
+    // policy
+    for (auto& p : params.policies)
+    {
         // services
-        for (int j = 0; j < p.services.size(); j++)
+        for (auto s : p.services)
         {
-            std::string s {p.services.at(j)};
             bool found = false;
 
             for (auto srv : knxnetip::service_identifier)
@@ -266,110 +282,101 @@ bool knxnetip::module::validate(param& params) {
             }
         }
 
-    }
+        // application layer services
+        for (auto a : p.app_services)
+        {
+            bool found = false;
 
-    return true;
-}
+            for (auto app : knxnetip::packet::cemi::apdu::app_service_identifier)
+            {
+                if(a == app.second) {
+                    found = true;
+                    break;
+                }
+            }
 
-bool knxnetip::module::load(param& params) {
+            if (!found)
+            {
+                LogMessage("ERROR: invalid application layer service '%s'\n", a.c_str());
+                a.clear();
+            }
+        }
 
-    /* FIXME-H:
-     * check if at least one policy is available,
-     * if not, create default one.
-     */
-
-    /*FIXME: configuration */
-    // server
-//    for (int i = 0; i < params.servers.size(); i++)
-//    {
-//
-//    }
-
-    // policy
-    for (int i = 0; i < params.policies.size(); i++)
-    {
-        policy& p{params.policies[i]};
-
+        // group address and spec
         if (!p.group_address_file.empty())
         {
             p.load_group_addr();
-
-            /*
-            std::string regexp;
-            if (p.group_address_level == 2)
-                regexp.assign(KNXNETIP_GRP_ADDR_2_REGEX);
-            else
-                regexp.assign(KNXNETIP_GRP_ADDR_3_REGEX);
-
-            std::regex grpaddr {regexp.c_str()};
-            std::smatch matches;
-
-            std::ifstream in(p.group_address_file.c_str());
-            std::string line;
-            while (std::getline(in, line))
-            {
-                if(std::regex_search(line, matches, grpaddr))
-                {
-                    if(p.group_address_level == 2)
-                    {
-                        p.group_addresses.push_back(
-                            get_group_address(
-                                matches[3].str(),
-                                matches[4].str()));
-                    }
-                    else
-                    {
-                        p.group_addresses.push_back(
-                            get_group_address(
-                                matches[3].str(),
-                                matches[4].str(),
-                                matches[5].str()));
-                    }
-                }
-            }
-            */
         }
     }
 
     return true;
 }
 
-const knxnetip::module::policy& knxnetip::module::get_policy(const param* param, const snort::Packet* p)
+void knxnetip::module::open_log(knxnetip::module::server& s)
 {
-    for (auto s : param->servers) {
-        if (s.cidr.contains(p->ptrs.ip_api.get_src()) == SfIpRet::SFIP_CONTAINS) {
-            return param->policies.at(s.policy);
-        }
-        if (s.cidr.contains(p->ptrs.ip_api.get_dst()) == SfIpRet::SFIP_CONTAINS) {
-            return param->policies.at(s.policy);
-        }
-    }
-
-    if (param->global_policy > 0) {
-        return param->policies.at(param->global_policy-1);
-    }
-
-    return param->policies.at(0);
+    std::string f = s.log_to_file ? F_NAME : "stdout";
+    s.log = TextLog_Init(f.c_str());
 }
 
-bool knxnetip::module::has_policy(const param* param, const snort::Packet *p)
+void knxnetip::module::close_log(knxnetip::module::server& s)
 {
-    bool r = false;
+    TextLog_Term(s.log);
+}
 
+knxnetip::module::server* knxnetip::module::get_server_src(param* param, const snort::Packet* p)
+{
+    for (int i = 0; i < param->servers.size(); i++)
+    {
+        knxnetip::module::server* s = &param->servers.at(i);
+        if (s->from.contains(p->ptrs.ip_api.get_src()) == SfIpRet::SFIP_CONTAINS)
+        {
+            return s;
+        }
+    }
+
+    return nullptr;
+}
+
+knxnetip::module::server* knxnetip::module::get_server_dst(param* param, const snort::Packet* p)
+{
+    for (int i = 0; i < param->servers.size(); i++)
+    {
+        knxnetip::module::server* s = &param->servers.at(i);
+        if (s->to.contains(p->ptrs.ip_api.get_dst()) == SfIpRet::SFIP_CONTAINS)
+        {
+            return s;
+        }
+    }
+
+    return nullptr;
+}
+
+const knxnetip::module::policy* knxnetip::module::get_policy_src(const param* param, const snort::Packet* p)
+{
     for (auto s : param->servers) {
-        if (s.cidr.contains(p->ptrs.ip_api.get_src()) == SfIpRet::SFIP_CONTAINS) {
-            r = true;
-            break;
-        }
-        if (s.cidr.contains(p->ptrs.ip_api.get_dst()) == SfIpRet::SFIP_CONTAINS) {
-            r = true;
-            break;
+        if (s.from.contains(p->ptrs.ip_api.get_src()) == SfIpRet::SFIP_CONTAINS) {
+            return &param->policies.at(s.policy-1);
         }
     }
 
-    if (param->global_policy > 0) {
-        r = true;
+    if (param->global_policy > 0 and param->global_policy <= param->policies.size()) {
+        return &param->policies.at(param->global_policy-1);
     }
 
-    return r;
+    return nullptr;
+}
+
+const knxnetip::module::policy* knxnetip::module::get_policy_dst(const param* param, const snort::Packet* p)
+{
+    for (auto s : param->servers) {
+        if (s.to.contains(p->ptrs.ip_api.get_dst()) == SfIpRet::SFIP_CONTAINS) {
+            return &param->policies.at(s.policy-1);
+        }
+    }
+
+    if (param->global_policy > 0 and param->global_policy <= param->policies.size()) {
+        return &param->policies.at(param->global_policy-1);
+    }
+
+    return nullptr;
 }
