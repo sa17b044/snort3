@@ -26,22 +26,24 @@ using namespace snort;
 
 const snort::Parameter knxnetip::module::server_params[] =
 {
-    {"cidr", Parameter::PT_STRING, nullptr, "0.0.0.0/32", "server ip address (CIDR notation)"},
+    {"from", Parameter::PT_STRING, nullptr, "0.0.0.0/32", "source ip address (CIDR notation)"},
+    {"to", Parameter::PT_STRING, nullptr, "0.0.0.0/32", "destination ip address (CIDR notation)"},
     {"port", Parameter::PT_PORT, "1:", "3671", "server port number(s)"},
     {"policy", Parameter::PT_INT, "1:", "1", "server policy"},
+    {"log_knxnetip", Parameter::PT_BOOL, nullptr, "false", "log inspection/detection events"},
+    {"log_to_file", Parameter::PT_BOOL, nullptr, "false", "log to file or console"},
     { nullptr, Parameter::PT_MAX, nullptr, nullptr, nullptr }
 };
 
 const Parameter knxnetip::module::policy_params[] =
 {
     {"individual_addressing",Parameter::PT_BOOL, nullptr, "false", "individual addressing detection"},
-    {"inspection", Parameter::PT_BOOL, nullptr, "true", "protocol inspection/validation"},
-    // print services
+    {"inspection", Parameter::PT_BOOL, nullptr, "true", "protocol inspection"},
     {"services", Parameter::PT_STRING, nullptr, nullptr, "service detection"},
-    // FIXIT-S: change to PT_IMPLIED
+    {"app_services", Parameter::PT_STRING, nullptr, nullptr, "application layer service detection"},
+    {"header", Parameter::PT_BOOL, nullptr, "false", "print header with alert"},
     {"payload", Parameter::PT_BOOL, nullptr, "false", "print payload with alert"},
-    // print group addresses
-    {"group_addressing", Parameter::PT_BOOL, nullptr, "false", "group address detection"},
+    {"detection", Parameter::PT_BOOL, nullptr, "false", "protocol detection"},
     {"group_address_level", Parameter::PT_INT, "2:3", "3",  "group address level (2/3)"},
     {"group_address_file", Parameter::PT_STRING, nullptr, nullptr, "group address file"},
     { nullptr, Parameter::PT_MAX, nullptr, nullptr, nullptr }
@@ -63,6 +65,12 @@ const snort::RuleMap knxnetip::module::events[] =
 const PegInfo knxnetip::module::peg_names[] =
 {
     { CountType::SUM, "total_frames", "total frames" },
+    { CountType::SUM, "valid_frames", "valid frames" },
+    { CountType::SUM, "illegal_services", "illegal knxnetip services" },
+    { CountType::SUM, "individual_address", "individual addressing" },
+    { CountType::SUM, "illegal_app_services", "illegal knxnetip application layer services" },
+    { CountType::SUM, "illegal_group_address", "illegal knx group addresses" },
+    { CountType::SUM, "extremas", "max/min exceeded" },
 	{ CountType::END, nullptr, nullptr }
 };
 
@@ -76,6 +84,7 @@ const RuleMap knxnetip::module::rules[] = {
     { KNXNETIP_INDIV_ADDR, KNXNETIP_INDIV_ADDR_STR },
     { KNXNETIP_INVALID_GROUP_ADDR, KNXNETIP_INVALID_GROUP_ADDR_STR },
     { KNXNETIP_SRVC, KNXNETIP_SRVC_STR },
+    { KNXNETIP_APP_SRVC, KNXNETIP_APP_SRVC_STR },
     /* Group Address */
     { KNXNETIP_GRPADDR_MAX, KNXNETIP_GRPADDR_MAX_STR },
     { KNXNETIP_GRPADDR_MIN, KNXNETIP_GRPADDR_MIN_STR },
@@ -83,3 +92,17 @@ const RuleMap knxnetip::module::rules[] = {
     { KNXNETIP_DUMMY, KNXNETIP_DUMMY_STR },
     { 0, nullptr }
 };
+
+const char* knxnetip::module::get_rule_str(int sid)
+{
+    int j;
+
+    for (j = 0; knxnetip::module::rules[j].msg != nullptr; j++)
+    {
+        if (sid == knxnetip::module::rules[j].sid)
+        {
+            break;
+        }
+    }
+    return knxnetip::module::rules[j].msg;
+}
