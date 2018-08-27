@@ -637,7 +637,7 @@ namespace knxnetip
                     uint16_t get_source_addr() const { return ntohs(*source_address); }
                     uint16_t get_destination_addr() const { return ntohs(*destination_address); }
 
-                    bool is_individual_address() const { return (get_ctrl2() && 0x80) == 0x00; }
+                    bool is_individual_address() const { return (get_ctrl2() & 0x80) == 0x00; }
                 };
 
                 class PollData
@@ -659,7 +659,7 @@ namespace knxnetip
                     uint8_t get_number_of_slots() const { return (*number_of_slots) & 0xf; }
                     uint8_t get_poll_data(int i) const { return i < 0 or i > get_number_of_slots() ? 0 : *(poll_data + i); }
 
-                    bool is_individual_address() const { return (get_ctrl2() && 0x80) == 0x00; }
+                    bool is_individual_address() const { return (get_ctrl2() & 0x80) == 0x00; }
                 };
 
                 class Raw
@@ -768,14 +768,10 @@ namespace knxnetip
             uint8_t get_additional_info_length() const { return *additional_info_length; }
 
             bool is_device_management() const { return ((*message_code) & 0xf0) == 0xf0; }
-            // bool is_data() const { return get_message_code() == cemi::MessageCode::L_DATA_REQ or get_message_code() == cemi::MessageCode::L_DATA_CON or get_message_code() == cemi::MessageCode::L_DATA_IND; }
-            // bool is_data_poll() const { return get_message_code() == cemi::MessageCode::L_POLL_DATA_REQ or get_message_code() == cemi::MessageCode::L_POLL_DATA_CON; }
-            // bool is_busmon() const { return get_message_code() == cemi::MessageCode::L_BUSMON_IND; }
-            // bool is_data_raw() const { return get_message_code() == cemi::MessageCode::L_RAW_REQ or get_message_code() == cemi::MessageCode::L_RAW_CON or get_message_code() == cemi::MessageCode::L_RAW_IND; }
-
         };
 
     }
+
 }
 
 #endif /* KNXNETIP_CEMI_H */
