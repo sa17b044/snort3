@@ -29,20 +29,23 @@ struct Packet;
 
 namespace knxnetip {
 
-    void queue_event(const knxnetip::module::policy& policy, unsigned sid);
-    void queue_event(unsigned sid);
+    using knxnetip::module::server;
+    using knxnetip::module::policy;
+
+    void queue_event(unsigned sid, const snort::Packet& p, const server& server, const policy& policy);
+    void queue_det_event(unsigned sid, const snort::Packet& p, const server& server, const policy& policy);
 
     namespace detection {
-        enum class Comp : uint8_t
-        {
-            lower = 0x00,
-            higher = 0x01
-        };
+        using knxnetip::module::server;
+        using knxnetip::module::policy;
 
-        void detect(knxnetip::Packet& p, const knxnetip::module::policy& policy);
-        bool is_individual_address(knxnetip::Packet& p);
-        bool is_invalid_group_address(knxnetip::Packet& p, const knxnetip::module::policy& policy);
-        bool out_of_bound(knxnetip::Packet& p, const knxnetip::module::policy& policy, Comp comp);
+        std::string get_rule_string(std::string rule, bool file);
+        void detect(const snort::Packet& p, knxnetip::Packet& knxp, server& server, const policy& policy);
+        bool is_illegal_service(const snort::Packet& p, knxnetip::Packet& knxp, server& server, const policy& policy);
+        bool is_individual_address(const snort::Packet& p, knxnetip::Packet& knxp, server& server, const policy& policy);
+        bool is_illegal_group_address(const snort::Packet& p, knxnetip::Packet& knxp, server& server, const policy& policy);
+        bool is_illegal_app_service(const snort::Packet& p, knxnetip::Packet& knxp, server& server, const policy& policy);
+        bool is_extrema(const snort::Packet& p, knxnetip::Packet& knxp, server& server, const policy& policy);
     }
 
 }
