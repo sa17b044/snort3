@@ -14,7 +14,7 @@
   <!--  @DTPs: The Data Point Types associated with the group address if available, comma separated, e.g. '1.001, 1.002'-->
   <GroupAddress Name="Zentral" Address="0/0/1" Central="true" DPTs="DPST-1-1" />
   <GroupAddress Name="Datum und Zeit" Address="0/1/0" DPTs="DPT-19" />
-  <GroupAddress Name="LichtA1 - Schalten EinAus" Address="1/0/0" DPTs="DPST-1-1" />
+  <GroupAddress Name="LichtA1 - Schalten EinAus" Address="1/0/0" DPTs="DPST-1-1" cond="name:pb_window,state:true"/>
   <GroupAddress Name="LichtA1 - Status Ein Aus" Address="1/0/1" DPTs="DPST-1-1" />
   <GroupAddress Name="LichtA2 - Schalten EinAus" Address="1/0/2" DPTs="DPST-1-1" />
   <GroupAddress Name="LichtA2 - Status Ein Aus" Address="1/0/3" DPTs="DPST-1-1" />
@@ -38,7 +38,7 @@
   <GroupAddress Name="J2 - Auf/Ab" Address="2/1/0" DPTs="DPST-1-8" />
   <GroupAddress Name="J2 - Stop/Lamelle" Address="2/1/1" DPTs="DPST-1-9" />
   <GroupAddress Name="J2 - Status Position Absolut" Address="2/1/2" DPTs="DPST-5-1" />
-  <GroupAddress Name="RaumA - Temperatur Ist" Address="3/0/0" DPTs="DPST-9-1" />
+  <GroupAddress Name="RaumA - Temperatur Ist" Address="3/0/0" DPTs="DPST-9-1" cond="name:pm_act,state:30.0"/>
   <GroupAddress Name="RaumA - Sollwertverschiebung Heizen" Address="3/0/1" DPTs="DPST-1-7" />
   <GroupAddress Name="RaumA - Sollwertverschiebung Kühlen" Address="3/0/2" DPTs="DPST-1-7" />
   <GroupAddress Name="RaumA - Sollwert Status Heizen" Address="3/0/3" DPTs="DPST-9-1" />
@@ -51,4 +51,7 @@
   <GroupAddress Name="RaumB - Stellgröße Heizen" Address="3/1/3" DPTs="DPST-5-1" />
   <GroupAddress Name="RaumB - Stellgröße Kühlen" Address="3/1/4" DPTs="DPST-5-1" />
   <GroupAddress Name="Stoerung_HLK" Address="3/2/0" />
+  <SecurityPolicy>
+    <SecurityAttribute name="vdi3813_651_pm_act" cond="pb_window,pm_act,AND">
+  </SecurityPolicy>
 </GroupAddress-Export>
