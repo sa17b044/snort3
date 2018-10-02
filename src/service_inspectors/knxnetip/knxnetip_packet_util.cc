@@ -39,7 +39,7 @@ void knxnetip::packet::HPAI::load(const snort::Packet& p, int& offset)
 
     if (get_structure_length() != hpai_length) {
         /*FIXME: alert */
-        snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_DUMMY);
+        snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_EXPECTED_LEN);
     }
 }
 
@@ -79,7 +79,7 @@ void knxnetip::packet::DIB::load(const snort::Packet& p, int& offset)
 
         default:
             /*FIXIT: alert */
-            snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_DUMMY);
+            snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_DIB_UNSUPPORTED);
             break;
     }
 
@@ -152,7 +152,7 @@ void knxnetip::packet::CRI::load(const snort::Packet& p, int& offset)
     if (get_structure_length() != (p.dsize - offset + 2))
     {
         /*FIXME: alert */
-        snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_DUMMY);
+        snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_EXPECTED_LEN);
     }
 
     switch(get_connection_type_code())
@@ -161,7 +161,7 @@ void knxnetip::packet::CRI::load(const snort::Packet& p, int& offset)
             if (get_structure_length() != 2)
             {
                 /*FIXME: alert */
-                snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_DUMMY);
+                snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_EXPECTED_LEN);
             }
             break;
 
@@ -169,7 +169,7 @@ void knxnetip::packet::CRI::load(const snort::Packet& p, int& offset)
             if (get_structure_length() != 4)
             {
                 /*FIXME: alert */
-                snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_DUMMY);
+                snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_EXPECTED_LEN);
             }
             util::get(knx_layer, p.data, offset, p.dsize);
             util::get(reserved, p.data, offset, p.dsize); /* call for correct offset tracking */
@@ -177,7 +177,7 @@ void knxnetip::packet::CRI::load(const snort::Packet& p, int& offset)
 
         default:
             /*FIXME: alert */
-            snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_DUMMY);
+            snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_CONN_TYPE_UNSUPPORTED);
             break;
     }
 }
@@ -189,7 +189,7 @@ void knxnetip::packet::CRD::load(const snort::Packet& p, int& offset)
     if (get_structure_length() != (p.dsize - offset + 2))
     {
         /*FIXME: alert */
-        snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_DUMMY);
+        snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_EXPECTED_LEN);
     }
 
     switch(get_connection_type_code())
@@ -198,7 +198,7 @@ void knxnetip::packet::CRD::load(const snort::Packet& p, int& offset)
             if (get_structure_length() != 2)
             {
                 /*FIXME: alert */
-                snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_DUMMY);
+                snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_EXPECTED_LEN);
             }
             break;
 
@@ -206,14 +206,14 @@ void knxnetip::packet::CRD::load(const snort::Packet& p, int& offset)
             if (get_structure_length() != 4)
             {
                 /*FIXME: alert */
-                snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_DUMMY);
+                snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_EXPECTED_LEN);
             }
             util::get(knx_address, p.data, offset, p.dsize);
             break;
 
         default:
             /*FIXME: alert */
-            snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_DUMMY);
+            snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_CONN_TYPE_UNSUPPORTED);
             break;
     }
 }
@@ -244,7 +244,7 @@ void knxnetip::packet::SELECTOR::load(const snort::Packet& p, int& offset)
 
         default:
             /*FIXME: alert */
-            snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_DUMMY);
+            snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_SELECTOR_UNSUPPORTED);
             break;
     }
 }

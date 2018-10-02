@@ -152,7 +152,7 @@ void knxnetip::packet::cemi::AdditionalInformation::load(const snort::Packet& p,
 
         default:
             /*FIXME: alert */
-            snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_DUMMY);
+            snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_CEMI_PROCESSING_ERROR);
             break;
     }
 }
@@ -234,7 +234,7 @@ void knxnetip::packet::cemi::DataLink::load(const snort::Packet& p, int& offset,
 
         default:
             /*FIXME: alert */
-            snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_DUMMY);
+            snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_CEMI_PROCESSING_ERROR);
             break;
     }
 }
@@ -294,7 +294,7 @@ void knxnetip::packet::cemi::DeviceManagement::load(const snort::Packet& p, int&
 
         default:
             /*FIXME: alert */
-            snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_DUMMY);
+            snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_CEMI_PROCESSING_ERROR);
     }
 
     /* Data available */
@@ -303,7 +303,7 @@ void knxnetip::packet::cemi::DeviceManagement::load(const snort::Packet& p, int&
         if (mc == MessageCode::M_RESET_REQ or mc == MessageCode::M_RESET_IND)
         {
             /*FIXME: alert */
-            snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_DUMMY);
+            snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_CEMI_PROCESSING_ERROR);
         }
         else if (devmgmt::DataProperty::is_error_response(mc, dp.get_number_of_elements()))
         {
@@ -326,7 +326,7 @@ void knxnetip::packet::cemi::DeviceManagement::load(const snort::Packet& p, int&
             mc == MessageCode::M_PROPINFO_IND)
         {
             /*FIXME: alert */
-            snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_DUMMY);
+            snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_CEMI_PROCESSING_ERROR);
         }
     }
 }
@@ -375,7 +375,7 @@ void knxnetip::packet::CEMI::load(const snort::Packet& p, int& offset, uint16_t 
 
             default:
                 /*FIXME: alert */
-                snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_DUMMY);
+                snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_CEMI_SRVC_UNSUPPORTED);
                 break;
         }
     }

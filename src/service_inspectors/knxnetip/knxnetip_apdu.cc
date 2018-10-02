@@ -266,7 +266,7 @@ void knxnetip::packet::cemi::apdu::Authorize::load(const snort::Packet& p, int& 
         if (*reserved != 0)
         {
             /*FIXME: alert */
-            snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_DUMMY);
+            snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_RESERVED_FIELD_W_DATA);
         }
         util::get(key, p.data, offset, p.dsize);
     }
@@ -608,7 +608,7 @@ void knxnetip::packet::cemi::APDU::load(const snort::Packet& p, int& offset, uin
 
         default:
             /*FIXME: alert */
-            snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_DUMMY);
+            snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_APP_SRVC_UNSUPPORTED);
             break;
     }
 }

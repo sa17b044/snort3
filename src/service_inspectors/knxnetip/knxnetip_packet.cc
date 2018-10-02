@@ -195,7 +195,7 @@ bool knxnetip::Packet::dissect(const snort::Packet& p, const knxnetip::module::s
 
     if (p.dsize != offset)
     {
-        knxnetip::queue_event(KNXNETIP_DUMMY, p, server, policy);
+        knxnetip::queue_event(KNXNETIP_TOTAL_LEN, p, server, policy);
         return false;
     }
 

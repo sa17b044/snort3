@@ -39,7 +39,7 @@ namespace knxnetip
                 (payload_length - offset) < (length ? sizeof(T) : length))
             {
                 /*FIXME: alert */
-                snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_DUMMY);
+                snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_PACKET_PROCESS);
             } else {
 
                 d = reinterpret_cast<const T*>(p + offset);
