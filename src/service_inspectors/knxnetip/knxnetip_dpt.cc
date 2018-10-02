@@ -230,7 +230,7 @@ bool knxnetip::dpt::is_extrema(knxnetip::packet::cemi::apdu::GroupValue& gv, knx
             ss << std::fixed << std::setprecision(2) << spec.max;
             extrema = ss.str();
         }
-        else if (spec.get_state(Spec::State::MIN) and v > spec.min)
+        else if (spec.get_state(Spec::State::MIN) and v < spec.min)
         {
             result = true;
             sid = KNXNETIP_GRPADDR_MIN;
