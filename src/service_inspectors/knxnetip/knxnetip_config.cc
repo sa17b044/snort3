@@ -177,12 +177,14 @@ bool knxnetip::module::policy::load_group_addr(void)
             std::regex rdptmax{knxnetip::regex::valid_dpt_max};
             if (std::regex_search(line, m, rdptmax))
             {
+                d.set_state(Spec::State::MAX);
                 d.max = std::stod(m[1].str());
             }
 
             std::regex rdptmin{knxnetip::regex::valid_dpt_min};
             if (std::regex_search(line, m, rdptmin))
             {
+                d.set_state(Spec::State::MIN);
                 d.min = std::stod(m[1].str());
             }
 
