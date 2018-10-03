@@ -30,6 +30,7 @@
 #include "knxnetip_module.h"
 #include "knxnetip_tables.h"
 #include "knxnetip_dpt.h"
+#include "knxnetip_enum.h"
 #include "knxnetip.h"
 
 #include "events/event_queue.h"
@@ -147,6 +148,10 @@ void knxnetip::detection::detect(const snort::Packet& p, knxnetip::Packet& knxp,
     else if (is_illegal_group_address(p, knxp, server, policy))
     {
         knxnetip_stats.illegal_group_address++;
+    }
+    else if (is_illegal_individual_address(p, knxp, server, policy))
+    {
+        knxnetip_stats.illegal_ia++;
     }
     /* Detect illegal application layer services */
     else if (is_illegal_app_service(p, knxp, server, policy))
@@ -316,14 +321,92 @@ bool knxnetip::detection::is_illegal_group_address(const snort::Packet& p, knxne
         if (server.log_knxnetip)
         {
             std::string rule = get_rule_string(KNXNETIP_INVALID_GROUP_ADDR_STR_PAR, server.log_to_file);
-            uint8_t main = (group_address & 0xf800) >> 11;
-            uint8_t middle = (group_address & 0x0700) >> 8;
-            uint8_t device = group_address & 0xff;
-            uint8_t device2 = group_address & 0x7ff;
+            uint8_t main = (group_address & KNX_GRPADDR_MAIN_M) >> KNX_GRPADDR_MAIN_S;
+            uint8_t middle = (group_address & KNX_GRPADDR_MID_M) >> KNX_GRPADDR_MID_S;
+            uint8_t device = group_address & KNX_GRPADDR3_DEV_M;
+            uint8_t device2 = group_address & KNX_GRPADDR2_DEV_M;
 
             TextLog_Print(server.log, rule.c_str(), GID_KNXNETIP,
                                       KNXNETIP_INVALID_GROUP_ADDR, 0,
                                       main, middle, device, main, device2);
+            TextLog_NewLine(server.log);
+            TextLog_Flush(server.log);
+
+        }
+    }
+
+    return result;
+}
+
+bool knxnetip::detection::is_illegal_individual_address(const snort::Packet& p, knxnetip::Packet& knxp, knxnetip::module::server& server, const knxnetip::module::policy& policy)
+{
+    using knxnetip::packet::cemi::MessageCode;
+    using snort::TextLog_Flush;
+    using snort::TextLog_Print;
+
+    knxnetip::packet::CEMI* c = get_cemi_frame(knxp);
+    if (c == nullptr) return false;
+
+    bool result = false;
+    uint16_t group_address = 0;
+    uint16_t individual_address = 0;
+    switch(c->get_message_code())
+    {
+        case MessageCode::L_DATA_REQ:
+        case MessageCode::L_DATA_CON:
+        case MessageCode::L_DATA_IND:
+            group_address = c->data_link.data.get_destination_addr();
+            individual_address = c->data_link.data.get_source_addr();
+            break;
+
+        case MessageCode::L_POLL_DATA_REQ:
+        case MessageCode::L_POLL_DATA_CON:
+            group_address = c->data_link.poll_data.get_destination_addr();
+            individual_address = c->data_link.poll_data.get_source_addr();
+            break;
+
+        default:
+            break;
+    }
+
+    if (group_address == 0) return false;
+
+    knxnetip::module::Spec spec = policy.group_addresses.find(group_address)->second;
+
+    /* Detect only when individual address is specified */
+    if (!spec.get_state(knxnetip::module::Spec::State::INDIV_ADDR))
+    {
+        return result;
+    }
+
+    /* Check if source address is not a listed individual address */
+    result = true;
+    for (auto& ia : spec.individual_addresses) {
+        if (ia == individual_address) {
+            result = false;
+            break;
+        }
+    }
+
+    if (result)
+    {
+        knxnetip::queue_det_event(KNXNETIP_INVALID_GROUP_ADDR, p, server, policy);
+        if (server.log_knxnetip)
+        {
+            std::string rule = get_rule_string(KNXNETIP_INVALID_INDIV_ADDR_STR_PAR, server.log_to_file);
+            uint8_t area = (individual_address & KNX_IA_AREA_M) >> KNX_IA_AREA_S;
+            uint8_t line = (individual_address & KNX_IA_LINE_M) >> KNX_IA_LINE_S;
+            uint8_t device = individual_address & KNX_IA_DEVICE_M;
+
+            uint8_t main = (group_address & KNX_GRPADDR_MAIN_M) >> KNX_GRPADDR_MAIN_S;
+            uint8_t middle = (group_address & KNX_GRPADDR_MID_M) >> KNX_GRPADDR_MID_S;
+            uint8_t grpdevice = group_address & KNX_GRPADDR3_DEV_M;
+            uint8_t grpdevice2 = group_address & KNX_GRPADDR2_DEV_M;
+
+            TextLog_Print(server.log, rule.c_str(), GID_KNXNETIP,
+                                      KNXNETIP_INVALID_INDIV_ADDR, 0,
+                                      area, line, device, spec.description.c_str(), main, middle,
+                                      grpdevice, main, grpdevice2, spec.group_members.c_str());
             TextLog_NewLine(server.log);
             TextLog_Flush(server.log);
 

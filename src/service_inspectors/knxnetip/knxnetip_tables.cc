@@ -70,6 +70,7 @@ const PegInfo knxnetip::module::peg_names[] =
     { CountType::SUM, "individual_address", "individual addressing" },
     { CountType::SUM, "illegal_app_services", "illegal knxnetip application layer services" },
     { CountType::SUM, "illegal_group_address", "illegal knx group addresses" },
+    { CountType::SUM, "illegal_ia", "illegal knx individual addresses" },
     { CountType::SUM, "extremas", "max/min exceeded" },
 	{ CountType::END, nullptr, nullptr }
 };

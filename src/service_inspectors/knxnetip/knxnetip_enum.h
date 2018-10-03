@@ -71,6 +71,27 @@ namespace knxnetip
         SECURE_GROUP_SYNC_RES = 0xaa07
     };
 
+
+#define KNX_GRPADDR_MAIN_MAX            (31)
+#define KNX_GRPADDR_MAIN_S              (11)
+#define KNX_GRPADDR_MAIN_M              (0xf800)
+#define KNX_GRPADDR2_DEV_MAX            (2047)
+#define KNX_GRPADDR2_DEV_M              (0x7ff)
+#define KNX_GRPADDR_MID_MAX             (7)
+#define KNX_GRPADDR_MID_S               (8)
+#define KNX_GRPADDR_MID_M               (0x0700)
+#define KNX_GRPADDR3_DEV_MAX            (255)
+#define KNX_GRPADDR3_DEV_M              (0xff)
+
+#define KNX_IA_AREA_MAX                 (15)
+#define KNX_IA_AREA_S                   (12)
+#define KNX_IA_AREA_M                   (0xf000)
+#define KNX_IA_LINE_MAX                 (15)
+#define KNX_IA_LINE_S                   (8)
+#define KNX_IA_LINE_M                   (0xf00)
+#define KNX_IA_DEVICE_MAX               (255)
+#define KNX_IA_DEVICE_M                 (0xff)
+
 #define FLAGS_DEVICESTATUS_RESERVED     (0xFE)
 #define FLAGS_DEVICESTATUS_PROGRAM      (0x01)
 #define FLAGS_IPCAPABILITES_RESERVED    (0xF8)

@@ -41,7 +41,9 @@ namespace knxnetip {
             double min;
             double frequency;
             double duration;
-
+            std::vector<uint16_t> individual_addresses;
+            std::string group_members;
+            std::string description;
 
             enum class State : uint8_t {
                 DPT = 0,
@@ -49,6 +51,7 @@ namespace knxnetip {
                 MIN = 2,
                 FREQUENCY = 3,
                 DURATION = 4,
+                INDIV_ADDR = 5,
                 END = 31
             };
 

@@ -41,10 +41,10 @@ namespace knxnetip {
 
 #define KNXNETIP_ALERT_START "[**] [%u:%u:%u] \"(knxnetip) "
 #define KNXNETIP_ALERT_END "\" [**]\n"
-//#define KNXNETIP_ALERT_CON_EM "\e[91m"
-//#define KNXNETIP_ALERT_CON_EM_RESET "\e[0m"
-#define KNXNETIP_ALERT_CON_EM ""
-#define KNXNETIP_ALERT_CON_EM_RESET ""
+#define KNXNETIP_ALERT_CON_EM "\e[91m"
+#define KNXNETIP_ALERT_CON_EM_RESET "\e[0m"
+//#define KNXNETIP_ALERT_CON_EM ""
+//#define KNXNETIP_ALERT_CON_EM_RESET ""
 
 /* Protocol Header */
 #define KNXNETIP_HEAD_SIZE 1
@@ -74,9 +74,9 @@ namespace knxnetip {
 #define KNXNETIP_INDIV_ADDR_STR "individual addressing"
 #define KNXNETIP_INDIV_ADDR_STR_PAR "individual addressing: <em>(%u.%u.%u)</em>"
 #define KNXNETIP_INVALID_INDIV_ADDR_STR "illegal individual address"
-#define KNXNETIP_INVALID_INDIV_ADDR_STR_PAR "illegal individual address: <em>(%u.%u.%u)"
+#define KNXNETIP_INVALID_INDIV_ADDR_STR_PAR "illegal individual address <em>%u.%u.%u</em> (<em>%s</em>: group %u/%u/%u or %u/%u, members: %s)"
 #define KNXNETIP_INVALID_GROUP_ADDR_STR "illegal group address"
-#define KNXNETIP_INVALID_GROUP_ADDR_STR_PAR "illegal group address: <em>(%u/%u/%u)</em> or <em>(%u/%u)</em>"
+#define KNXNETIP_INVALID_GROUP_ADDR_STR_PAR "illegal group address: <em>%u/%u/%u</em> or <em>%u/%u</em>"
 #define KNXNETIP_SRVC_STR "illegal service type"
 #define KNXNETIP_SRVC_STR_PAR "illegal service type: <em>%s</em>"
 #define KNXNETIP_APP_SRVC_STR "illegal application layer service type"

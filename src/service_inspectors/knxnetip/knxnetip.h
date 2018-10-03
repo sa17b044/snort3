@@ -33,6 +33,7 @@ struct KNXnetIPStats
     PegCount individual_address;
     PegCount illegal_app_services;
     PegCount illegal_group_address;
+    PegCount illegal_ia;
     PegCount extremas;
 };
 

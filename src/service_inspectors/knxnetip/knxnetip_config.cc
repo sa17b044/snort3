@@ -60,6 +60,7 @@ bool knxnetip::module::policy::load_group_addr(void)
         bool valid = false;
         std::string group_address;
         std::string data_point_type;
+        std::string description;
 
         if (ext == "xml")
         {
@@ -84,12 +85,18 @@ bool knxnetip::module::policy::load_group_addr(void)
 
             data_point_type.assign(m[1].str());
 
+            // validate description
+            std::regex rdescr{knxnetip::regex::xml::valid_descr};
+            if (std::regex_search(vl, m, rdescr)) {
+                description.assign(m[1]);
+            }
+
             valid = true;
         }
         else if (ext == "csv")
         {
             // validate group address
-            std::regex rg{knxnetip::regex::csv::valid_address};
+            std::regex rg{knxnetip::regex::csv::valid_group_address};
             if (!std::regex_search(line, m, rg))
                 continue;
 
@@ -120,13 +127,13 @@ bool knxnetip::module::policy::load_group_addr(void)
                     unsigned long main {std::stoul(m[1].str())};
                     unsigned long device {std::stoul(m[2].str())};
 
-                    if (main > 31 or device > 2047)
+                    if (main > KNX_GRPADDR_MAIN_MAX or device > KNX_GRPADDR2_DEV_MAX)
                     {
                         LogMessage("ERROR: invalid group address: %s\n", group_address.c_str());
                     }
                     else
                     {
-                        g = (main << 11) | device;
+                        g = (main << KNX_GRPADDR_MAIN_S) | device;
                     }
                 }
             }
@@ -139,13 +146,13 @@ bool knxnetip::module::policy::load_group_addr(void)
                     unsigned long middle {std::stoul(m[2].str())};
                     unsigned long device {std::stoul(m[3].str())};
 
-                    if (main > 31 or middle > 7 or device > 255)
+                    if (main > KNX_GRPADDR_MAIN_MAX or middle > KNX_GRPADDR_MID_MAX or device > KNX_GRPADDR3_DEV_MAX)
                     {
                         LogMessage("ERROR: invalid group address: %s\n", group_address.c_str());
                     }
                     else
                     {
-                        g = (main << 11) | (middle << 8) | device;
+                        g = (main << KNX_GRPADDR_MAIN_S) | (middle << KNX_GRPADDR_MID_S) | device;
                     }
                 }
             }
@@ -170,6 +177,9 @@ bool knxnetip::module::policy::load_group_addr(void)
                 {
                     d.set_state(Spec::State::DPT);
                     d.dpt = (range << 16) | unit;
+                    if (d.dpt == 0) {
+                        LogMessage("ERROR: invalid data point type: %s\n", m[1].str().c_str());
+                    }
                 }
             }
 
@@ -188,19 +198,44 @@ bool knxnetip::module::policy::load_group_addr(void)
                 d.min = std::stod(m[1].str());
             }
 
+            /* validate and add individual addresses */
+            std::regex ria{knxnetip::regex::valid_individual_address};
+            if (std::regex_search(line, m, ria))
+            {
+                d.group_members.assign(m[1]);
+                std::stringstream ss{m[1]};
+                std::string s;
+
+                while (std::getline(ss, s, ','))
+                {
+                    std::regex rindivaddr{knxnetip::regex::individual_address};
+                    if (std::regex_search(s, m, rindivaddr))
+                    {
+                        int area = std::stoi(m[1]);
+                        int line = std::stoi(m[2]);
+                        int device = std::stoi(m[3]);
+
+                        if (area < 0 or area > KNX_IA_AREA_MAX or line < 0 or
+                            line > KNX_IA_LINE_MAX or device < 0 or device > KNX_IA_DEVICE_MAX)
+                        {
+                            break;
+                        }
+
+                        uint16_t ia = (area << KNX_IA_AREA_S) | (line << KNX_IA_LINE_S) | device;
+                        d.individual_addresses.push_back(ia);
+                        d.set_state(Spec::State::INDIV_ADDR);
+                    }
+                }
+            }
+
             /* Add converted values */
             if (g == 0)
             {
                 LogMessage("ERROR: invalid group address: %s\n", m[1].str().c_str());
             }
-
-            if (d.dpt == 0)
+            else
             {
-                LogMessage("ERROR: invalid data point type: %s\n", m[1].str().c_str());
-            }
-
-            if (g != 0)
-            {
+                d.description.assign(description);
                 group_addresses.insert(std::pair<uint16_t,Spec>(g, d));
             }
         }
@@ -317,7 +352,7 @@ bool knxnetip::module::load(param& params)
 void knxnetip::module::open_log(knxnetip::module::server& s)
 {
     std::string f = s.log_to_file ? F_NAME : "stdout";
-    s.log = TextLog_Init(f.c_str());
+    s.log = TextLog_Init(f.c_str(), 4*1024, 8*1024*1024);
 }
 
 void knxnetip::module::close_log(knxnetip::module::server& s)

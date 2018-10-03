@@ -98,19 +98,21 @@ void KNXnetIP::eval(Packet *p)
         policy = knxnetip::module::get_policy_dst(params, p);
     }
 
-    knxnetip::module::open_log(*server);
+    if (server != 0 and policy != 0) {
+        knxnetip::module::open_log(*server);
 
-    // dissect packet
-    if (policy != nullptr and knxp.dissect(*p, *server, *policy))
-    {
-        // analyze packet
-        knxnetip::detection::detect(*p, knxp, *server, *policy);
-        knxnetip_stats.valid_frames++;
+        // dissect packet
+        if (policy != nullptr and knxp.dissect(*p, *server, *policy))
+        {
+            // analyze packet
+            knxnetip::detection::detect(*p, knxp, *server, *policy);
+            knxnetip_stats.valid_frames++;
+        }
+
+        // peg counts
+        knxnetip_stats.frames++;
+        knxnetip::module::close_log(*server);
     }
-
-    // peg counts
-    knxnetip_stats.frames++;
-    knxnetip::module::close_log(*server);
 }
 
 //void KNXnetIP::clear(Packet *p)

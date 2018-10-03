@@ -44,6 +44,7 @@ namespace knxnetip {
         bool is_illegal_service(const snort::Packet& p, knxnetip::Packet& knxp, server& server, const policy& policy);
         bool is_individual_address(const snort::Packet& p, knxnetip::Packet& knxp, server& server, const policy& policy);
         bool is_illegal_group_address(const snort::Packet& p, knxnetip::Packet& knxp, server& server, const policy& policy);
+        bool is_illegal_individual_address(const snort::Packet& p, knxnetip::Packet& knxp, server& server, const policy& policy);
         bool is_illegal_app_service(const snort::Packet& p, knxnetip::Packet& knxp, server& server, const policy& policy);
         bool is_extrema(const snort::Packet& p, knxnetip::Packet& knxp, server& server, const policy& policy);
     }
