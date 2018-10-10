@@ -25,7 +25,7 @@
 #include "detection/detection_engine.h"
 #include "knxnetip_module.h"
 #include "knxnetip_tables.h"
-
+#include "knxnetip_detect.h"
 
 /* CEMI - Add. Info */
 void knxnetip::packet::cemi::add_info::PlMediumInfo::load(const snort::Packet& p, int& offset)
@@ -99,7 +99,7 @@ void knxnetip::packet::cemi::add_info::ManufacturerSpecificData::load(const snor
     offset += length;
 }
 
-void knxnetip::packet::cemi::AdditionalInformation::load(const snort::Packet& p, int& offset)
+void knxnetip::packet::cemi::AdditionalInformation::load(const snort::Packet& p, int& offset, const knxnetip::module::server& server, const knxnetip::module::policy& policy)
 {
     util::get(type_id, p.data, offset, p.dsize);
     util::get(length, p.data, offset, p.dsize);
@@ -151,25 +151,24 @@ void knxnetip::packet::cemi::AdditionalInformation::load(const snort::Packet& p,
             break;
 
         default:
-            /*FIXME: alert */
-            snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_CEMI_PROCESSING_ERROR);
+            knxnetip::queue_event(KNXNETIP_CEMI_PROCESSING_ERROR, p, server, policy);
             break;
     }
 }
 
 /* CEMI - TPDU */
-void knxnetip::packet::cemi::TPDU::load(const snort::Packet& p, int& offset)
+void knxnetip::packet::cemi::TPDU::load(const snort::Packet& p, int& offset, const knxnetip::module::server& server, const knxnetip::module::policy& policy)
 {
     util::get(information_length, p.data, offset, p.dsize);
 
     if (get_info_length() > 0)
     {
-        apdu.load(p, offset, get_info_length());
+        apdu.load(p, offset, get_info_length(), server, policy);
     }
 }
 
 /* CEMI - NPDU */
-void knxnetip::packet::cemi::NPDU::load(const snort::Packet& p, int& offset)
+void knxnetip::packet::cemi::NPDU::load(const snort::Packet& p, int& offset, const knxnetip::module::server& server, const knxnetip::module::policy& policy)
 {
     util::get(information_length, p.data, offset, p.dsize);
     util::get(tpci, p.data, offset, p.dsize);
@@ -177,18 +176,18 @@ void knxnetip::packet::cemi::NPDU::load(const snort::Packet& p, int& offset)
     if (get_info_length() > 0)
     {
         offset -= 1;
-        apdu.load(p, offset, get_info_length());
+        apdu.load(p, offset, get_info_length(), server, policy);
     }
 }
 
 /* CEMI - Data Link */
-void knxnetip::packet::cemi::datalink::Data::load(const snort::Packet& p, int& offset)
+void knxnetip::packet::cemi::datalink::Data::load(const snort::Packet& p, int& offset, const knxnetip::module::server& server, const knxnetip::module::policy& policy)
 {
     util::get(control_field_1, p.data, offset, p.dsize);
     util::get(control_field_2, p.data, offset, p.dsize);
     util::get(source_address, p.data, offset, p.dsize);
     util::get(destination_address, p.data, offset, p.dsize);
-    npdu.load(p, offset);
+    npdu.load(p, offset, server, policy);
 }
 
 void knxnetip::packet::cemi::datalink::PollData::load(const snort::Packet& p, int& offset, MessageCode mc)
@@ -210,14 +209,14 @@ void knxnetip::packet::cemi::datalink::Raw::load(const snort::Packet& p, int& of
     util::get(raw_data, p.data, offset, p.dsize, p.dsize - offset);
 }
 
-void knxnetip::packet::cemi::DataLink::load(const snort::Packet& p, int& offset, MessageCode mc)
+void knxnetip::packet::cemi::DataLink::load(const snort::Packet& p, int& offset, MessageCode mc, const knxnetip::module::server& server, const knxnetip::module::policy& policy)
 {
     switch(mc)
     {
         case cemi::MessageCode::L_DATA_REQ:
         case cemi::MessageCode::L_DATA_CON:
         case cemi::MessageCode::L_DATA_IND:
-            data.load(p, offset);
+            data.load(p, offset, server, policy);
             break;
 
         case cemi::MessageCode::L_POLL_DATA_REQ:
@@ -233,17 +232,16 @@ void knxnetip::packet::cemi::DataLink::load(const snort::Packet& p, int& offset,
             break;
 
         default:
-            /*FIXME: alert */
-            snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_CEMI_PROCESSING_ERROR);
+            knxnetip::queue_event(KNXNETIP_CEMI_PROCESSING_ERROR, p, server, policy);
             break;
     }
 }
 
 /* CEMI - Transport */
-void knxnetip::packet::cemi::Transport::load(const snort::Packet& p, int& offset)
+void knxnetip::packet::cemi::Transport::load(const snort::Packet& p, int& offset, const knxnetip::module::server& server, const knxnetip::module::policy& policy)
 {
     util::get(reserved, p.data, offset, p.dsize, reserved_size);
-    tpdu.load(p, offset);
+    tpdu.load(p, offset, server, policy);
 }
 
 /* CEMI - Device Mgmt */
@@ -268,7 +266,7 @@ void knxnetip::packet::cemi::devmgmt::FunctionProperty::load(const snort::Packet
     }
 }
 
-void knxnetip::packet::cemi::DeviceManagement::load(const snort::Packet& p, int& offset, MessageCode mc, uint16_t body_length)
+void knxnetip::packet::cemi::DeviceManagement::load(const snort::Packet& p, int& offset, MessageCode mc, uint16_t body_length, const knxnetip::module::server& server, const knxnetip::module::policy& policy)
 {
     switch(mc)
     {
@@ -293,8 +291,7 @@ void knxnetip::packet::cemi::DeviceManagement::load(const snort::Packet& p, int&
             break;
 
         default:
-            /*FIXME: alert */
-            snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_CEMI_PROCESSING_ERROR);
+            knxnetip::queue_event(KNXNETIP_CEMI_PROCESSING_ERROR, p, server, policy);
     }
 
     /* Data available */
@@ -302,8 +299,7 @@ void knxnetip::packet::cemi::DeviceManagement::load(const snort::Packet& p, int&
     {
         if (mc == MessageCode::M_RESET_REQ or mc == MessageCode::M_RESET_IND)
         {
-            /*FIXME: alert */
-            snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_CEMI_PROCESSING_ERROR);
+            knxnetip::queue_event(KNXNETIP_CEMI_PROCESSING_ERROR, p, server, policy);
         }
         else if (devmgmt::DataProperty::is_error_response(mc, dp.get_number_of_elements()))
         {
@@ -325,21 +321,20 @@ void knxnetip::packet::cemi::DeviceManagement::load(const snort::Packet& p, int&
             mc == MessageCode::M_PROPREAD_CON or mc == MessageCode::M_PROPWRITE_REQ or
             mc == MessageCode::M_PROPINFO_IND)
         {
-            /*FIXME: alert */
-            snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_CEMI_PROCESSING_ERROR);
+            knxnetip::queue_event(KNXNETIP_CEMI_PROCESSING_ERROR, p, server, policy);
         }
     }
 }
 
 /* CEMI */
-void knxnetip::packet::CEMI::load(const snort::Packet& p, int& offset, uint16_t body_length)
+void knxnetip::packet::CEMI::load(const snort::Packet& p, int& offset, uint16_t body_length, const knxnetip::module::server& server, const knxnetip::module::policy& policy)
 {
     util::get(message_code, p.data, offset, p.dsize);
 
     /* Device Management */
     if (is_device_management())
     {
-        device_mgmt.load(p, offset, get_message_code(), body_length);
+        device_mgmt.load(p, offset, get_message_code(), body_length, server, policy);
     }
     else
     {
@@ -348,7 +343,7 @@ void knxnetip::packet::CEMI::load(const snort::Packet& p, int& offset, uint16_t 
         /* Additional Information (optional) */
         if (get_additional_info_length() > 0)
         {
-            additional_information.load(p, offset);
+            additional_information.load(p, offset, server, policy);
         }
 
         switch(get_message_code())
@@ -363,19 +358,18 @@ void knxnetip::packet::CEMI::load(const snort::Packet& p, int& offset, uint16_t 
             case cemi::MessageCode::L_RAW_CON:
             case cemi::MessageCode::L_RAW_IND:
             case cemi::MessageCode::L_BUSMON_IND:
-                data_link.load(p, offset, get_message_code());
+                data_link.load(p, offset, get_message_code(), server, policy);
                 break;
 
             case cemi::MessageCode::T_DATA_CONNEC_REQ:
             case cemi::MessageCode::T_DATA_CONNEC_IND:
             case cemi::MessageCode::T_DATA_INDV_REQ:
             case cemi::MessageCode::T_DATA_INDV_IND:
-                transport.load(p, offset);
+                transport.load(p, offset, server, policy);
                 break;
 
             default:
-                /*FIXME: alert */
-                snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_CEMI_SRVC_UNSUPPORTED);
+                knxnetip::queue_event(KNXNETIP_CEMI_SRVC_UNSUPPORTED, p, server, policy);
                 break;
         }
     }

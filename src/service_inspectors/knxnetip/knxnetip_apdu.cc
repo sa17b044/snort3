@@ -25,6 +25,10 @@
 #include "detection/detection_engine.h"
 #include "knxnetip_module.h"
 #include "knxnetip_tables.h"
+#include "knxnetip_detect.h"
+
+using knxnetip::module::server;
+using knxnetip::module::policy;
 
 std::map<knxnetip::packet::cemi::apdu::Type, std::string> knxnetip::packet::cemi::apdu::app_service_identifier
 {
@@ -258,15 +262,14 @@ void knxnetip::packet::cemi::apdu::MemoryBit::load(const snort::Packet& p, int& 
     util::get(xor_data, p.data, offset, p.dsize, get_number());
 }
 
-void knxnetip::packet::cemi::apdu::Authorize::load(const snort::Packet& p, int& offset, apdu::Type t)
+void knxnetip::packet::cemi::apdu::Authorize::load(const snort::Packet& p, int& offset, apdu::Type t, const knxnetip::module::server& server, const knxnetip::module::policy& policy)
 {
     if (t == Type::A_Authorize_Request)
     {
         util::get(reserved, p.data, offset, p.dsize);
         if (*reserved != 0)
         {
-            /*FIXME: alert */
-            snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_RESERVED_FIELD_W_DATA);
+            knxnetip::queue_event(KNXNETIP_RESERVED_FIELD_W_DATA, p, server, policy);
         }
         util::get(key, p.data, offset, p.dsize);
     }
@@ -321,7 +324,7 @@ void knxnetip::packet::cemi::apdu::NetworkParameter::load(const snort::Packet& p
     util::get(test_info, p.data, offset, p.dsize);
 }
 
-void knxnetip::packet::cemi::apdu::IndividualAddressSerialNumber::load(const snort::Packet& p, int& offset, apdu::Type t)
+void knxnetip::packet::cemi::apdu::IndividualAddressSerialNumber::load(const snort::Packet& p, int& offset, apdu::Type t, const server& server, const policy& policy)
 {
     util::get(serial_number, p.data, offset, p.dsize, ser_num_size);
 
@@ -329,11 +332,19 @@ void knxnetip::packet::cemi::apdu::IndividualAddressSerialNumber::load(const sno
     {
         util::get(domain_address, p.data, offset, p.dsize);
         util::get(reserved, p.data, offset, p.dsize); /* call for correct offset tracking */
+        if (*reserved != 0)
+        {
+            knxnetip::queue_event(KNXNETIP_RESERVED_FIELD_W_DATA, p, server, policy);
+        }
     }
     else if (t == Type::A_IndividualAddressSerialNumber_Write)
     {
         util::get(domain_address, p.data, offset, p.dsize);
         util::get(reserved2, p.data, offset, p.dsize); /* call for correct offset tracking */
+        if (*reserved2 != 0)
+        {
+            knxnetip::queue_event(KNXNETIP_RESERVED_FIELD_W_DATA, p, server, policy);
+        }
     }
 }
 
@@ -434,7 +445,7 @@ knxnetip::packet::cemi::apdu::Type knxnetip::packet::cemi::APDU::get_apci() cons
     return static_cast<apdu::Type>(ntohs(*apci) & 0x3ff);
 }
 
-void knxnetip::packet::cemi::APDU::load(const snort::Packet& p, int& offset, uint8_t information_length)
+void knxnetip::packet::cemi::APDU::load(const snort::Packet& p, int& offset, uint8_t information_length, const knxnetip::module::server& server, const knxnetip::module::policy& policy)
 {
     util::get(apci, p.data, offset, p.dsize);
 
@@ -536,7 +547,7 @@ void knxnetip::packet::cemi::APDU::load(const snort::Packet& p, int& offset, uin
 
         case apdu::Type::A_Authorize_Request:
         case apdu::Type::A_Authorize_Response:
-            authorize.load(p, offset, get_apci());
+            authorize.load(p, offset, get_apci(), server, policy);
             break;
 
         case apdu::Type::A_Key_Write:
@@ -563,7 +574,7 @@ void knxnetip::packet::cemi::APDU::load(const snort::Packet& p, int& offset, uin
         case apdu::Type::A_IndividualAddressSerialNumber_Read:
         case apdu::Type::A_IndividualAddressSerialNumber_Respone:
         case apdu::Type::A_IndividualAddressSerialNumber_Write:
-            indiv_addr_serial_number.load(p, offset, get_apci());
+            indiv_addr_serial_number.load(p, offset, get_apci(), server, policy);
             break;
 
         /* not for future use (formerly: A_ServiceInformation_Indication) */
@@ -607,8 +618,7 @@ void knxnetip::packet::cemi::APDU::load(const snort::Packet& p, int& offset, uin
             break;
 
         default:
-            /*FIXME: alert */
-            snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_APP_SRVC_UNSUPPORTED);
+            knxnetip::queue_event(KNXNETIP_APP_SRVC_UNSUPPORTED, p, server, policy);
             break;
     }
 }

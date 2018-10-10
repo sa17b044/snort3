@@ -24,6 +24,7 @@
 #include <map>
 #include <string>
 #include "protocols/packet.h"
+#include "knxnetip_config.h"
 
 namespace knxnetip
 {
@@ -310,7 +311,7 @@ namespace knxnetip
                     };
                     const uint32_t* key;
                 public:
-                    void load(const snort::Packet& p, int& offset, apdu::Type t);
+                    void load(const snort::Packet& p, int& offset, apdu::Type t, const knxnetip::module::server& server, const knxnetip::module::policy& policy);
 
                     uint8_t get_level() const { return *level; }
                     uint32_t get_key() const { return ntohl(*key); }
@@ -396,7 +397,7 @@ namespace knxnetip
                 public:
                     constexpr static const uint8_t ser_num_size = 6;
 
-                    void load(const snort::Packet& p, int& offset, apdu::Type t);
+                    void load(const snort::Packet& p, int& offset, apdu::Type t, const knxnetip::module::server& server, const knxnetip::module::policy& policy);
 
                     uint8_t get_serial_number(int i) const { return i >= ser_num_size ? 0 : serial_number[i]; }
                     uint16_t get_domain_address() const { return *domain_address; }
@@ -493,7 +494,7 @@ namespace knxnetip
                     apdu::FileStream file_stream;
                 };
 
-                void load(const snort::Packet& p, int& offset, uint8_t length);
+                void load(const snort::Packet& p, int& offset, uint8_t length, const knxnetip::module::server& server, const knxnetip::module::policy& policy);
 
                 apdu::Type get_apci() const;
             };

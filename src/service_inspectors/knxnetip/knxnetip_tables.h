@@ -46,41 +46,31 @@ namespace knxnetip {
 //#define KNXNETIP_ALERT_CON_EM ""
 //#define KNXNETIP_ALERT_CON_EM_RESET ""
 
-/* Protocol Header */
-#define KNXNETIP_HEAD_SIZE 1
-#define KNXNETIP_PROT_VERS 2
-#define KNXNETIP_TOTAL_LEN 3
-#define KNXNETIP_SRVC_TYPE 4
-#define KNXNETIP_PACKET_PROCESS 5
+/* Protocol Processing */
+#define KNXNETIP_PACKET_PROCESS 1 // inspection
+#define KNXNETIP_HEAD_SIZE 2 // inspection
+#define KNXNETIP_PROT_VERS 3 // inspection
+#define KNXNETIP_TOTAL_LEN 4 // inspection
+#define KNXNETIP_SRVC_TYPE 5 // inspection
+#define KNXNETIP_EXPECTED_LEN 6 // inspection
+#define KNXNETIP_DIB_UNSUPPORTED 7 // inspection
+#define KNXNETIP_CONN_TYPE_UNSUPPORTED 8 // inspection
+#define KNXNETIP_SELECTOR_UNSUPPORTED 9 // inspection
+#define KNXNETIP_APP_SRVC_UNSUPPORTED 10 // inspection
+#define KNXNETIP_RESERVED_FIELD_W_DATA 11 // inspection
+#define KNXNETIP_CEMI_SRVC_UNSUPPORTED 12 // inspection
+#define KNXNETIP_CEMI_PROCESSING_ERROR 13 // inspection
 
+#define KNXNETIP_PKT_PROCESS_STR "erroneous packet content"
+#define KNXNETIP_PKT_PROCESS_STR_PAR "erroneous packet content: <em>%u<em> bytes to read, but only <em>%u<em> available"
 #define KNXNETIP_HEAD_SIZE_STR "invalid header size"
 #define KNXNETIP_PROT_VERS_STR "invalid protocol version"
 #define KNXNETIP_TOTAL_LEN_STR "total length of packet does not match received length"
 #define KNXNETIP_SRVC_TYPE_STR "invalid service type"
-#define KNXNETIP_PKT_PROCESS_STR "erroneous packet content"
-#define KNXNETIP_PKT_PROCESS_STR_PAR "erroneous packet content: <em>%u<em> bytes to read, but only <em>%u<em> available"
-
-/* Protocol Services */
-#define KNXNETIP_INDIV_ADDR 11
-#define KNXNETIP_INVALID_INDIV_ADDR 12
-#define KNXNETIP_INVALID_GROUP_ADDR 13
-#define KNXNETIP_SRVC 14
-#define KNXNETIP_APP_SRVC 15
-#define KNXNETIP_APP_SRVC_UNSUPPORTED 16
-#define KNXNETIP_RESERVED_FIELD_W_DATA 17
-#define KNXNETIP_CEMI_SRVC_UNSUPPORTED 18
-#define KNXNETIP_CEMI_PROCESSING_ERROR 19
-
-#define KNXNETIP_INDIV_ADDR_STR "individual addressing"
-#define KNXNETIP_INDIV_ADDR_STR_PAR "individual addressing: <em>(%u.%u.%u)</em>"
-#define KNXNETIP_INVALID_INDIV_ADDR_STR "illegal individual address"
-#define KNXNETIP_INVALID_INDIV_ADDR_STR_PAR "illegal individual address <em>%u.%u.%u</em> (<em>%s</em>: group %u/%u/%u or %u/%u, members: %s)"
-#define KNXNETIP_INVALID_GROUP_ADDR_STR "illegal group address"
-#define KNXNETIP_INVALID_GROUP_ADDR_STR_PAR "illegal group address: <em>%u/%u/%u</em> or <em>%u/%u</em>"
-#define KNXNETIP_SRVC_STR "illegal service type"
-#define KNXNETIP_SRVC_STR_PAR "illegal service type: <em>%s</em>"
-#define KNXNETIP_APP_SRVC_STR "illegal application layer service type"
-#define KNXNETIP_APP_SRVC_STR_PAR "illegal application layer service type: <em>%s</em>"
+#define KNXNETIP_EXPECTED_LEN_STR "total length of packet does not match expected length"
+#define KNXNETIP_DIB_UNSUPPORTED_STR "unsupported DIB type"
+#define KNXNETIP_CONN_TYPE_UNSUPPORTED_STR "unsupported connection type"
+#define KNXNETIP_SELECTOR_UNSUPPORTED_STR "unsupported SELECTOR type"
 #define KNXNETIP_APP_SRVC_UNSUPPORTED_STR "unsupported application layer service type"
 #define KNXNETIP_APP_SRVC_UNSUPPORTED_STR_PAR "unsupported application layer service type: <em>%s</em>"
 #define KNXNETIP_RESERVED_FIELD_W_DATA_STR "reserved protocol field with data"
@@ -90,26 +80,29 @@ namespace knxnetip {
 #define KNXNETIP_CEMI_PROCESSING_ERROR_STR "CEMI processing error"
 #define KNXNETIP_CEMI_PROCESSING_ERROR_STR_PAR "CEMI processing error: <em>%s<em>"
 
-/* Group Address */
-#define KNXNETIP_GRPADDR_MAX 21
-#define KNXNETIP_GRPADDR_MIN 22
+/* Anomaly Detection */
+#define KNXNETIP_INDIV_ADDR 14 // individual_addressing
+#define KNXNETIP_SRVC 15 // detection
+#define KNXNETIP_APP_SRVC 16 // detection
+#define KNXNETIP_INVALID_GROUP_ADDR 17 // detection
+#define KNXNETIP_INVALID_INDIV_ADDR 18 // detection
+#define KNXNETIP_GRPADDR_MAX 19 // detection
+#define KNXNETIP_GRPADDR_MIN 20 // detection
 
+#define KNXNETIP_INDIV_ADDR_STR "individual addressing"
+#define KNXNETIP_INDIV_ADDR_STR_PAR "individual addressing: <em>(%u.%u.%u)</em>"
+#define KNXNETIP_SRVC_STR "illegal service type"
+#define KNXNETIP_SRVC_STR_PAR "illegal service type: <em>%s</em>"
+#define KNXNETIP_APP_SRVC_STR "illegal application layer service type"
+#define KNXNETIP_APP_SRVC_STR_PAR "illegal application layer service type: <em>%s</em>"
+#define KNXNETIP_INVALID_GROUP_ADDR_STR "illegal group address"
+#define KNXNETIP_INVALID_GROUP_ADDR_STR_PAR "illegal group address: <em>%u/%u/%u</em> or <em>%u/%u</em>"
+#define KNXNETIP_INVALID_INDIV_ADDR_STR "illegal individual address"
+#define KNXNETIP_INVALID_INDIV_ADDR_STR_PAR "illegal individual address <em>%u.%u.%u</em> (<em>%s</em>: group %u/%u/%u or %u/%u, members: %s)"
 #define KNXNETIP_GRPADDR_MAX_STR "value out of range (max)"
 #define KNXNETIP_GRPADDR_MAX_STR_PAR "value out of range (max): <em>%s %s</em> (Maximum: <em>%s %s</em>)"
 #define KNXNETIP_GRPADDR_MIN_STR "value out of range (min)"
 #define KNXNETIP_GRPADDR_MIN_STR_PAR "value out of range (min): <em>%s %s</em> (Minimum: <em>%s %s</em>)"
-
-/* Misc */
-#define KNXNETIP_EXPECTED_LEN 31
-#define KNXNETIP_DIB_UNSUPPORTED 32
-#define KNXNETIP_CONN_TYPE_UNSUPPORTED 33
-#define KNXNETIP_SELECTOR_UNSUPPORTED 34
-
-#define KNXNETIP_EXPECTED_LEN_STR "total length of packet does not match expected length"
-#define KNXNETIP_DIB_UNSUPPORTED_STR "unsupported DIB type"
-#define KNXNETIP_CONN_TYPE_UNSUPPORTED_STR "unsupported connection type"
-#define KNXNETIP_SELECTOR_UNSUPPORTED_STR "unsupported SELECTOR type"
-
 
 //#define KNXNETIP_DUMMY 100
 //#define KNXNETIP_DUMMY_STR "knxnetip dummy rule"

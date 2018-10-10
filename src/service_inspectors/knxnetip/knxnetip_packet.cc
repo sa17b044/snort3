@@ -27,7 +27,10 @@
 #include "knxnetip_tables.h"
 #include "knxnetip_detect.h"
 
-bool knxnetip::Packet::dissect(const snort::Packet& p, const knxnetip::module::server& server, const knxnetip::module::policy& policy)
+using knxnetip::module::server;
+using knxnetip::module::policy;
+
+bool knxnetip::Packet::dissect(const snort::Packet& p, const server& server, const policy& policy)
 {
     using knxnetip::packet::Header;
     using knxnetip::ServiceType;
@@ -55,31 +58,31 @@ bool knxnetip::Packet::dissect(const snort::Packet& p, const knxnetip::module::s
         {
             /* KNXnet/IP Core */
             case ServiceType::SEARCH_REQ:
-                search_request.load(p, offset);
+                search_request.load(p, offset, server, policy);
                 break;
 
             case ServiceType::SEARCH_RES:
-                search_response.load(p, offset);
+                search_response.load(p, offset, server, policy);
                 break;
 
             case ServiceType::DESCRIPTION_REQ:
-                description_request.load(p, offset);
+                description_request.load(p, offset, server, policy);
                 break;
 
             case ServiceType::DESCRIPTION_RES:
-                description_response.load(p, offset, h->get_body_length());
+                description_response.load(p, offset, h->get_body_length(), server, policy);
                 break;
 
             case ServiceType::CONNECT_REQ:
-                connect_request.load(p, offset);
+                connect_request.load(p, offset, server, policy);
                 break;
 
             case ServiceType::CONNECT_RES:
-                connect_response.load(p, offset);
+                connect_response.load(p, offset, server, policy);
                 break;
 
             case ServiceType::CONNECTIONSTATE_REQ:
-                connection_state_request.load(p, offset);
+                connection_state_request.load(p, offset, server, policy);
                 break;
 
             case ServiceType::CONNECTIONSTATE_RES:
@@ -87,7 +90,7 @@ bool knxnetip::Packet::dissect(const snort::Packet& p, const knxnetip::module::s
                 break;
 
             case ServiceType::DISCONNECT_REQ:
-                disconnect_request.load(p, offset);
+                disconnect_request.load(p, offset, server, policy);
                 break;
 
             case ServiceType::DISCONNECT_RES:
@@ -96,7 +99,7 @@ bool knxnetip::Packet::dissect(const snort::Packet& p, const knxnetip::module::s
 
             /* KNXnet/IP Device Management */
             case ServiceType::DEVICE_CONFIGURATION_REQ:
-                device_conf_request.load(p, offset, h->get_body_length());
+                device_conf_request.load(p, offset, h->get_body_length(), server, policy);
                 break;
 
             case ServiceType::DEVICE_CONFIGURATION_ACK:
@@ -105,7 +108,7 @@ bool knxnetip::Packet::dissect(const snort::Packet& p, const knxnetip::module::s
 
             /* KNXnet/IP Tunnelling */
             case ServiceType::TUNNELLING_REQ:
-                tunnelling_request.load(p, offset, h->get_body_length());
+                tunnelling_request.load(p, offset, h->get_body_length(), server, policy);
                 break;
 
             case ServiceType::TUNNELLING_ACK:
@@ -114,7 +117,7 @@ bool knxnetip::Packet::dissect(const snort::Packet& p, const knxnetip::module::s
 
             /* KNXnet/IP Routing */
             case ServiceType::ROUTING_INDICATION:
-                routing_indication.load(p, offset, h->get_body_length());
+                routing_indication.load(p, offset, h->get_body_length(), server, policy);
                 break;
 
             case ServiceType::ROUTING_LOST:
@@ -127,7 +130,7 @@ bool knxnetip::Packet::dissect(const snort::Packet& p, const knxnetip::module::s
 
             /* KNXnet/IP Remote Diagnosis and Configuration */
             case ServiceType::REMOTE_DIAG_REQ:
-                rem_diag_request.load(p, offset);
+                rem_diag_request.load(p, offset, server, policy);
                 break;
 
             case ServiceType::REMOTE_DIAG_RES:
@@ -135,11 +138,11 @@ bool knxnetip::Packet::dissect(const snort::Packet& p, const knxnetip::module::s
                 break;
 
             case ServiceType::REMOTE_BASIC_CONF_REQ:
-                rem_basic_conf_request.load(p, offset, h->get_body_length());
+                rem_basic_conf_request.load(p, offset, server, policy, h->get_body_length());
                 break;
 
             case ServiceType::REMOTE_RESET_REQ:
-                rem_reset_request.load(p, offset);
+                rem_reset_request.load(p, offset, server, policy);
                 break;
 
             default:
@@ -159,7 +162,7 @@ bool knxnetip::Packet::dissect(const snort::Packet& p, const knxnetip::module::s
                 break;
 
             case ServiceType::SECURE_CHANNEL_REQ:
-                sec_chan_request.load(p, offset);
+                sec_chan_request.load(p, offset, server, policy);
                 break;
 
             case ServiceType::SECURE_CHANNEL_RES:
@@ -171,7 +174,7 @@ bool knxnetip::Packet::dissect(const snort::Packet& p, const knxnetip::module::s
                 break;
 
             case ServiceType::SECURE_CHANNEL_STAT:
-                sec_chan_status.load(p, offset);
+                sec_chan_status.load(p, offset, server, policy);
                 break;
 
             case ServiceType::SECURE_GROUP_SYNC_REQ:
@@ -202,28 +205,28 @@ bool knxnetip::Packet::dissect(const snort::Packet& p, const knxnetip::module::s
     return true;
 }
 
-void knxnetip::packet::SearchRequest::load(const snort::Packet& p, int& offset)
+void knxnetip::packet::SearchRequest::load(const snort::Packet& p, int& offset, const server& server, const policy& policy)
 {
-    discovery_endpoint.load(p, offset);
+    discovery_endpoint.load(p, offset, server, policy);
 }
 
-void knxnetip::packet::SearchResponse::load(const snort::Packet& p, int& offset)
+void knxnetip::packet::SearchResponse::load(const snort::Packet& p, int& offset, const server& server, const policy& policy)
 {
-    control_endpoint.load(p, offset);
-    device_hardware.load(p, offset);
-    supported_service_families.load(p, offset);
+    control_endpoint.load(p, offset, server, policy);
+    device_hardware.load(p, offset, server, policy);
+    supported_service_families.load(p, offset, server, policy);
 }
 
-void knxnetip::packet::DescriptionRequest::load(const snort::Packet& p, int& offset)
+void knxnetip::packet::DescriptionRequest::load(const snort::Packet& p, int& offset, const server& server, const policy& policy)
 {
-    control_endpoint.load(p, offset);
+    control_endpoint.load(p, offset, server, policy);
 }
 
-void knxnetip::packet::DescriptionResponse::load(const snort::Packet& p, int& offset, int body_length)
+void knxnetip::packet::DescriptionResponse::load(const snort::Packet& p, int& offset, int body_length, const server& server, const policy& policy)
 {
     int current_offset = offset;
-    device_hardware.load(p, offset);
-    supported_service_families.load(p, offset);
+    device_hardware.load(p, offset, server, policy);
+    supported_service_families.load(p, offset, server, policy);
 
     if (body_length > (offset - current_offset))
     {
@@ -264,26 +267,30 @@ knxnetip::packet::DIB knxnetip::packet::DescriptionResponse::get_add_dib(int i) 
     return r;
 }
 
-void knxnetip::packet::ConnectRequest::load(const snort::Packet& p, int& offset)
+void knxnetip::packet::ConnectRequest::load(const snort::Packet& p, int& offset, const server& server, const policy& policy)
 {
-    control_endpoint.load(p, offset);
-    data_endpoint.load(p, offset);
-    connection_req_info.load(p, offset);
+    control_endpoint.load(p, offset, server, policy);
+    data_endpoint.load(p, offset, server, policy);
+    connection_req_info.load(p, offset, server, policy);
 }
 
-void knxnetip::packet::ConnectResponse::load(const snort::Packet& p, int& offset)
+void knxnetip::packet::ConnectResponse::load(const snort::Packet& p, int& offset, const server& server, const policy& policy)
 {
     knxnetip::util::get(communication_channel_id, p.data, offset, p.dsize);
     knxnetip::util::get(connection_status, p.data, offset, p.dsize);
-    data_endpoint.load(p, offset);
-    connection_res_dblock.load(p, offset);
+    data_endpoint.load(p, offset, server, policy);
+    connection_res_dblock.load(p, offset, server, policy);
 }
 
-void knxnetip::packet::ConnectionStateRequest::load(const snort::Packet& p, int& offset)
+void knxnetip::packet::ConnectionStateRequest::load(const snort::Packet& p, int& offset, const server& server, const policy& policy)
 {
     knxnetip::util::get(communication_channel_id, p.data, offset, p.dsize);
     knxnetip::util::get(reserved, p.data, offset, p.dsize); /* call for correct offset tracking */
-    control_endpoint.load(p, offset);
+    if (*reserved != 0)
+    {
+        knxnetip::queue_event(KNXNETIP_RESERVED_FIELD_W_DATA, p, server, policy);
+    }
+    control_endpoint.load(p, offset, server, policy);
 }
 
 void knxnetip::packet::ConnectionStateResponse::load(const snort::Packet& p, int& offset)
@@ -292,11 +299,15 @@ void knxnetip::packet::ConnectionStateResponse::load(const snort::Packet& p, int
     knxnetip::util::get(status, p.data, offset, p.dsize);
 }
 
-void knxnetip::packet::DisconnectRequest::load(const snort::Packet& p, int& offset)
+void knxnetip::packet::DisconnectRequest::load(const snort::Packet& p, int& offset, const server& server, const policy& policy)
 {
     knxnetip::util::get(communication_channel_id, p.data, offset, p.dsize);
     knxnetip::util::get(reserved, p.data, offset, p.dsize); /* call for correct offset tracking */
-    control_endpoint.load(p, offset);
+    if (*reserved != 0)
+    {
+        knxnetip::queue_event(KNXNETIP_RESERVED_FIELD_W_DATA, p, server, policy);
+    }
+    control_endpoint.load(p, offset, server, policy);
 }
 
 void knxnetip::packet::DisconnectResponse::load(const snort::Packet& p, int& offset)
@@ -305,10 +316,10 @@ void knxnetip::packet::DisconnectResponse::load(const snort::Packet& p, int& off
     knxnetip::util::get(status, p.data, offset, p.dsize);
 }
 
-void knxnetip::packet::DeviceConfigurationRequest::load(const snort::Packet& p, int& offset, int body_length)
+void knxnetip::packet::DeviceConfigurationRequest::load(const snort::Packet& p, int& offset, int body_length, const knxnetip::module::server& server, const knxnetip::module::policy& policy)
 {
     connection_header.load(p, offset);
-    cemi_frame.load(p, offset, body_length);
+    cemi_frame.load(p, offset, body_length, server, policy);
 }
 
 void knxnetip::packet::DeviceConfigurationAcknowledge::load(const snort::Packet& p, int& offset)
@@ -316,10 +327,10 @@ void knxnetip::packet::DeviceConfigurationAcknowledge::load(const snort::Packet&
     connection_header.load(p, offset);
 }
 
-void knxnetip::packet::TunnellingRequest::load(const snort::Packet& p, int& offset, int body_length)
+void knxnetip::packet::TunnellingRequest::load(const snort::Packet& p, int& offset, int body_length, const knxnetip::module::server& server, const knxnetip::module::policy& policy)
 {
     connection_header.load(p, offset);
-    cemi_frame.load(p, offset, body_length);
+    cemi_frame.load(p, offset, body_length, server, policy);
 }
 
 void knxnetip::packet::TunnellingAcknowledge::load(const snort::Packet& p, int& offset)
@@ -327,9 +338,9 @@ void knxnetip::packet::TunnellingAcknowledge::load(const snort::Packet& p, int& 
     connection_header.load(p, offset);
 }
 
-void knxnetip::packet::RoutingIndication::load(const snort::Packet& p, int& offset, int body_length)
+void knxnetip::packet::RoutingIndication::load(const snort::Packet& p, int& offset, int body_length, const knxnetip::module::server& server, const knxnetip::module::policy& policy)
 {
-    cemi_frame.load(p, offset, body_length);
+    cemi_frame.load(p, offset, body_length, server, policy);
 }
 
 void knxnetip::packet::RoutingLost::load(const snort::Packet& p, int& offset)
@@ -347,9 +358,9 @@ void knxnetip::packet::RoutingBusy::load(const snort::Packet& p, int& offset)
     knxnetip::util::get(routing_busy_control_field, p.data, offset, p.dsize);
 }
 
-void knxnetip::packet::RemoteDiagnosticRequest::load(const snort::Packet& p, int& offset)
+void knxnetip::packet::RemoteDiagnosticRequest::load(const snort::Packet& p, int& offset, const server& server, const policy& policy)
 {
-    discovery_endpoint.load(p, offset);
+    discovery_endpoint.load(p, offset, server, policy);
     selector.load(p, offset);
 }
 
@@ -394,10 +405,10 @@ knxnetip::packet::DIB knxnetip::packet::RemoteDiagnosticResponse::get_dib(int i)
     return r;
 }
 
-void knxnetip::packet::RemoteBasicConfigurationRequest::load(const snort::Packet& p, int& offset, int body_length)
+void knxnetip::packet::RemoteBasicConfigurationRequest::load(const snort::Packet& p, int& offset, const server& server, const policy& policy, int body_length)
 {
     int current_offset = offset;
-    discovery_endpoint.load(p, offset);
+    discovery_endpoint.load(p, offset, server, policy);
     selector.load(p, offset);
 
     if (body_length > (offset - current_offset))
@@ -440,11 +451,15 @@ knxnetip::packet::DIB knxnetip::packet::RemoteBasicConfigurationRequest::get_dib
     return r;
 }
 
-void knxnetip::packet::RemoteResetRequest::load(const snort::Packet& p, int& offset)
+void knxnetip::packet::RemoteResetRequest::load(const snort::Packet& p, int& offset, const server& server, const policy& policy)
 {
     selector.load(p, offset);
     knxnetip::util::get(reset_command, p.data, offset, p.dsize);
     knxnetip::util::get(reserved, p.data, offset, p.dsize); /* call for correct offset tracking */
+    if (*reserved != 0)
+    {
+        knxnetip::queue_event(KNXNETIP_RESERVED_FIELD_W_DATA, p, server, policy);
+    }
 }
 
 void knxnetip::packet::SecureWrapper::load(const snort::Packet& p, int& offset)
@@ -456,9 +471,9 @@ void knxnetip::packet::SecureWrapper::load(const snort::Packet& p, int& offset)
     knxnetip::util::get(encrypted_data, p.data, offset, p.dsize, length);
 }
 
-void knxnetip::packet::SecureChannelRequest::load(const snort::Packet& p, int& offset)
+void knxnetip::packet::SecureChannelRequest::load(const snort::Packet& p, int& offset, const server& server, const policy& policy)
 {
-    control_endpoint.load(p, offset);
+    control_endpoint.load(p, offset, server, policy);
     knxnetip::util::get(client_public_value, p.data, offset, p.dsize, pub_val_size);
 }
 
@@ -479,10 +494,14 @@ void knxnetip::packet::SecureChannelAuthorize::load(const snort::Packet& p, int&
     knxnetip::util::get(message_auth_code, p.data, offset, p.dsize, msg_aut_size);
 }
 
-void knxnetip::packet::SecureChannelStatus::load(const snort::Packet& p, int& offset)
+void knxnetip::packet::SecureChannelStatus::load(const snort::Packet& p, int& offset, const server& server, const policy& policy)
 {
     knxnetip::util::get(status, p.data, offset, p.dsize);
     knxnetip::util::get(reserved, p.data, offset, p.dsize); /* call for correct offset tracking */
+    if (*reserved != 0)
+    {
+        knxnetip::queue_event(KNXNETIP_RESERVED_FIELD_W_DATA, p, server, policy);
+    }
 }
 
 void knxnetip::packet::SecureGroupSyncRequest::load(const snort::Packet& p, int& offset)

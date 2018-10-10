@@ -23,7 +23,7 @@
 #include <cstdint>
 #include <string>
 #include "protocols/packet.h"
-#include "detection/detection_engine.h"
+//#include "detection/detection_engine.h"
 #include "knxnetip_util.h"
 #include "knxnetip_module.h"
 #include "knxnetip_tables.h"
@@ -40,7 +40,7 @@ namespace knxnetip
             const uint16_t* port;
 
         public:
-            void load(const snort::Packet& p, int& offset);
+            void load(const snort::Packet& p, int& offset, const knxnetip::module::server& server, const knxnetip::module::policy& policy);
 
             uint8_t get_structure_length() const { return *structure_length; }
             uint8_t get_host_protocol() const { return *host_protocol; }
@@ -139,6 +139,7 @@ namespace knxnetip
                 const uint8_t* reserved;
 
             public:
+                void load(const snort::Packet& p, int& offset, const knxnetip::module::server& server, const knxnetip::module::policy& policy);
                 void load(const snort::Packet& p, int& offset);
 
                 std::string get_ip() const { return std::string{inet_ntoa({(in_addr_t)(*ip)})}; }
@@ -187,6 +188,7 @@ namespace knxnetip
                 dib::MfrData mfr_data;
             };
 
+            void load(const snort::Packet& p, int& offset, const knxnetip::module::server& server, const knxnetip::module::policy& policy);
             void load(const snort::Packet& p, int& offset);
 
             uint8_t get_dib_structure_length() const { return *dib_structure_length; }
@@ -228,7 +230,7 @@ namespace knxnetip
             const uint8_t *reserved;
 
         public:
-            void load(const snort::Packet& p, int& offset);
+            void load(const snort::Packet& p, int& offset, const knxnetip::module::server& server, const knxnetip::module::policy& policy);
 
             uint8_t get_knx_layer() const { return *knx_layer; }
         };
@@ -237,7 +239,7 @@ namespace knxnetip
             const uint16_t *knx_address;
 
         public:
-            void load(const snort::Packet& p, int& offset);
+            void load(const snort::Packet& p, int& offset, const knxnetip::module::server& server, const knxnetip::module::policy& policy);
 
             uint16_t get_knx_address() const { return ntohs(*knx_address); }
         };

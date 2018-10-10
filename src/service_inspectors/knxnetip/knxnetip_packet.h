@@ -57,7 +57,7 @@ namespace knxnetip
         {
             knxnetip::packet::HPAI discovery_endpoint;
 
-            void load(const snort::Packet& p, int& offset);
+            void load(const snort::Packet& p, int& offset, const knxnetip::module::server& server, const knxnetip::module::policy& policy);
         };
 
         struct SearchResponse
@@ -66,14 +66,14 @@ namespace knxnetip
             knxnetip::packet::DIB device_hardware;
             knxnetip::packet::DIB supported_service_families;
 
-            void load(const snort::Packet& p, int& offset);
+            void load(const snort::Packet& p, int& offset, const knxnetip::module::server& server, const knxnetip::module::policy& policy);
         };
 
         struct DescriptionRequest
         {
             knxnetip::packet::HPAI control_endpoint;
 
-            void load(const snort::Packet& p, int& offset);
+            void load(const snort::Packet& p, int& offset, const knxnetip::module::server& server, const knxnetip::module::policy& policy);
         };
 
         class DescriptionResponse
@@ -84,7 +84,7 @@ namespace knxnetip
             knxnetip::packet::DIB device_hardware;
             knxnetip::packet::DIB supported_service_families;
 
-            void load(const snort::Packet& p, int& offset, int body_length);
+            void load(const snort::Packet& p, int& offset, int body_length, const knxnetip::module::server& server, const knxnetip::module::policy& policy);
             knxnetip::packet::DIB get_add_dib(int i) const;
         };
 
@@ -94,7 +94,7 @@ namespace knxnetip
             knxnetip::packet::HPAI data_endpoint;
             knxnetip::packet::CRI connection_req_info;
 
-            void load(const snort::Packet& p, int& offset);
+            void load(const snort::Packet& p, int& offset, const knxnetip::module::server& server, const knxnetip::module::policy& policy);
         };
 
         class ConnectResponse
@@ -113,7 +113,7 @@ namespace knxnetip
             knxnetip::packet::HPAI data_endpoint;
             knxnetip::packet::CRD connection_res_dblock;
 
-            void load(const snort::Packet& p, int& offset);
+            void load(const snort::Packet& p, int& offset, const knxnetip::module::server& server, const knxnetip::module::policy& policy);
 
             uint8_t get_communication_channel_id() const { return *communication_channel_id; }
             ErrorCode get_connection_status() const { return static_cast<ErrorCode>(*connection_status); }
@@ -127,7 +127,7 @@ namespace knxnetip
         public:
             knxnetip::packet::HPAI control_endpoint;
 
-            void load(const snort::Packet& p, int& offset);
+            void load(const snort::Packet& p, int& offset, const knxnetip::module::server& server, const knxnetip::module::policy& policy);
 
             uint8_t get_communication_channel_id() const { return *communication_channel_id; }
 
@@ -160,7 +160,7 @@ namespace knxnetip
         public:
             knxnetip::packet::HPAI control_endpoint;
 
-            void load(const snort::Packet& p, int& offset);
+            void load(const snort::Packet& p, int& offset, const knxnetip::module::server& server, const knxnetip::module::policy& policy);
 
             uint8_t get_communication_channel_id() const { return *communication_channel_id; }
         };
@@ -183,7 +183,7 @@ namespace knxnetip
             knxnetip::packet::ConnectionHeader connection_header;
             knxnetip::packet::CEMI cemi_frame;
 
-            void load(const snort::Packet& p, int& offset, int body_length);
+            void load(const snort::Packet& p, int& offset, int body_length, const knxnetip::module::server& server, const knxnetip::module::policy& policy);
         };
 
         class DeviceConfigurationAcknowledge
@@ -204,7 +204,7 @@ namespace knxnetip
             knxnetip::packet::ConnectionHeader connection_header;
             knxnetip::packet::CEMI cemi_frame;
 
-            void load(const snort::Packet& p, int& offset, int body_length);
+            void load(const snort::Packet& p, int& offset, int body_length, const knxnetip::module::server& server, const knxnetip::module::policy& policy);
         };
 
         class TunnellingAcknowledge
@@ -225,7 +225,7 @@ namespace knxnetip
         public:
             knxnetip::packet::CEMI cemi_frame;
 
-            void load(const snort::Packet& p, int& offset, int body_length);
+            void load(const snort::Packet& p, int& offset, int body_length, const knxnetip::module::server& server, const knxnetip::module::policy& policy);
         };
 
         class RoutingLost
@@ -254,7 +254,7 @@ namespace knxnetip
             knxnetip::packet::HPAI discovery_endpoint;
             knxnetip::packet::SELECTOR selector;
 
-            void load(const snort::Packet& p, int& offset);
+            void load(const snort::Packet& p, int& offset, const knxnetip::module::server& server, const knxnetip::module::policy& policy);
         };
 
         class RemoteDiagnosticResponse
@@ -285,7 +285,7 @@ namespace knxnetip
 
         public:
 
-            void load(const snort::Packet& p, int& offset, int body_length);
+            void load(const snort::Packet& p, int& offset, const knxnetip::module::server& server, const knxnetip::module::policy& policy, int body_length);
 
             knxnetip::packet::DIB get_dib(int i) const;
         };
@@ -301,7 +301,7 @@ namespace knxnetip
 
         public:
 
-            void load(const snort::Packet& p, int& offset);
+            void load(const snort::Packet& p, int& offset, const knxnetip::module::server& server, const knxnetip::module::policy& policy);
 
             uint8_t get_reset_command() const { return *reset_command; }
         };
@@ -327,7 +327,7 @@ namespace knxnetip
         public:
             constexpr static const uint8_t pub_val_size = 36;
             knxnetip::packet::HPAI control_endpoint;
-            void load(const snort::Packet& p, int& offset);
+            void load(const snort::Packet& p, int& offset, const knxnetip::module::server& server, const knxnetip::module::policy& policy);
 
             uint8_t get_client_public_value(int i) const { return i < 0 or i > pub_val_size ? 0 : *(client_public_value + i); }
         };
@@ -371,7 +371,7 @@ namespace knxnetip
                 TIMEOUT = 0x03
             };
 
-            void load(const snort::Packet& p, int& offset);
+            void load(const snort::Packet& p, int& offset, const knxnetip::module::server& server, const knxnetip::module::policy& policy);
 
             StatusCode get_status() const { return static_cast<StatusCode>(*status); }
         };

@@ -26,9 +26,13 @@
 //#include "knxnetip_tables.h"
 #include "knxnetip_util.h"
 #include "knxnetip_packet_util.h"
+#include "knxnetip_detect.h"
+
+using knxnetip::module::server;
+using knxnetip::module::policy;
 
 /* HPAI */
-void knxnetip::packet::HPAI::load(const snort::Packet& p, int& offset)
+void knxnetip::packet::HPAI::load(const snort::Packet& p, int& offset, const server& server, const policy& policy)
 {
     uint8_t hpai_length = 8;
 
@@ -38,12 +42,52 @@ void knxnetip::packet::HPAI::load(const snort::Packet& p, int& offset)
     util::get(port, p.data, offset, p.dsize);
 
     if (get_structure_length() != hpai_length) {
-        /*FIXME: alert */
-        snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_EXPECTED_LEN);
+        knxnetip::queue_event(KNXNETIP_EXPECTED_LEN, p, server, policy);
     }
 }
 
 /* DIB */
+void knxnetip::packet::DIB::load(const snort::Packet& p, int& offset, const server& server, const policy& policy)
+{
+    uint8_t dib_header_length = 2;
+
+    util::get(dib_structure_length, p.data, offset, p.dsize);
+    util::get(dib_type, p.data, offset, p.dsize);
+
+    switch(get_dib_type())
+    {
+        case dib::Type::DEVICE_INFO:
+            device_info.load(p, offset);
+            break;
+
+        case dib::Type::SUPP_SVC:
+            supp_svc_families.load(p, offset, get_dib_structure_length() - dib_header_length);
+            break;
+
+        case dib::Type::IP_CONF:
+            ip_config.load(p, offset);
+            break;
+
+        case dib::Type::IP_CURRENT:
+            ip_current.load(p, offset, server, policy);
+            break;
+
+        case dib::Type::KNX_ADDRESS:
+            knx_address.load(p, offset);
+            break;
+
+        case dib::Type::MFR_DATA:
+            mfr_data.load(p, offset, get_dib_structure_length() - dib_header_length);
+            break;
+
+        default:
+            knxnetip::queue_event(KNXNETIP_DIB_UNSUPPORTED, p, server, policy);
+            break;
+    }
+
+}
+
+
 void knxnetip::packet::DIB::load(const snort::Packet& p, int& offset)
 {
     uint8_t dib_header_length = 2;
@@ -115,6 +159,20 @@ void knxnetip::packet::dib::IpConfig::load(const snort::Packet& p, int& offset)
     util::get(assignment_method, p.data, offset, p.dsize);
 }
 
+void knxnetip::packet::dib::IpCurrent::load(const snort::Packet& p, int& offset, const server& server, const policy& policy)
+{
+    util::get(ip, p.data, offset, p.dsize);
+    util::get(subnet, p.data, offset, p.dsize);
+    util::get(gateway, p.data, offset, p.dsize);
+    util::get(dhcp, p.data, offset, p.dsize);
+    util::get(assignment_method, p.data, offset, p.dsize);
+    util::get(reserved, p.data, offset, p.dsize); /* call for correct offset tracking */
+    if (*reserved != 0)
+    {
+        knxnetip::queue_event(KNXNETIP_RESERVED_FIELD_W_DATA, p, server, policy);
+    }
+}
+
 void knxnetip::packet::dib::IpCurrent::load(const snort::Packet& p, int& offset)
 {
     util::get(ip, p.data, offset, p.dsize);
@@ -145,14 +203,13 @@ void knxnetip::packet::cr::CR::load(const snort::Packet& p, int& offset)
     util::get(connection_type_code, p.data, offset, p.dsize);
 }
 
-void knxnetip::packet::CRI::load(const snort::Packet& p, int& offset)
+void knxnetip::packet::CRI::load(const snort::Packet& p, int& offset, const server& server, const policy& policy)
 {
     CR::load(p, offset);
 
     if (get_structure_length() != (p.dsize - offset + 2))
     {
-        /*FIXME: alert */
-        snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_EXPECTED_LEN);
+        knxnetip::queue_event(KNXNETIP_EXPECTED_LEN, p, server, policy);
     }
 
     switch(get_connection_type_code())
@@ -160,36 +217,36 @@ void knxnetip::packet::CRI::load(const snort::Packet& p, int& offset)
         case cr::ConnType::DEVICE_MGMT_CONNECTION:
             if (get_structure_length() != 2)
             {
-                /*FIXME: alert */
-                snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_EXPECTED_LEN);
+                knxnetip::queue_event(KNXNETIP_EXPECTED_LEN, p, server, policy);
             }
             break;
 
         case cr::ConnType::TUNNEL_CONNECTION:
             if (get_structure_length() != 4)
             {
-                /*FIXME: alert */
-                snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_EXPECTED_LEN);
+                knxnetip::queue_event(KNXNETIP_EXPECTED_LEN, p, server, policy);
             }
             util::get(knx_layer, p.data, offset, p.dsize);
             util::get(reserved, p.data, offset, p.dsize); /* call for correct offset tracking */
+            if (*reserved != 0)
+            {
+                knxnetip::queue_event(KNXNETIP_RESERVED_FIELD_W_DATA, p, server, policy);
+            }
             break;
 
         default:
-            /*FIXME: alert */
-            snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_CONN_TYPE_UNSUPPORTED);
+            knxnetip::queue_event(KNXNETIP_CONN_TYPE_UNSUPPORTED, p, server, policy);
             break;
     }
 }
 
-void knxnetip::packet::CRD::load(const snort::Packet& p, int& offset)
+void knxnetip::packet::CRD::load(const snort::Packet& p, int& offset, const server& server, const policy& policy)
 {
     CR::load(p, offset);
 
     if (get_structure_length() != (p.dsize - offset + 2))
     {
-        /*FIXME: alert */
-        snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_EXPECTED_LEN);
+        knxnetip::queue_event(KNXNETIP_EXPECTED_LEN, p, server, policy);
     }
 
     switch(get_connection_type_code())
@@ -197,23 +254,20 @@ void knxnetip::packet::CRD::load(const snort::Packet& p, int& offset)
         case cr::ConnType::DEVICE_MGMT_CONNECTION:
             if (get_structure_length() != 2)
             {
-                /*FIXME: alert */
-                snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_EXPECTED_LEN);
+                knxnetip::queue_event(KNXNETIP_EXPECTED_LEN, p, server, policy);
             }
             break;
 
         case cr::ConnType::TUNNEL_CONNECTION:
             if (get_structure_length() != 4)
             {
-                /*FIXME: alert */
-                snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_EXPECTED_LEN);
+                knxnetip::queue_event(KNXNETIP_EXPECTED_LEN, p, server, policy);
             }
             util::get(knx_address, p.data, offset, p.dsize);
             break;
 
         default:
-            /*FIXME: alert */
-            snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_CONN_TYPE_UNSUPPORTED);
+            knxnetip::queue_event(KNXNETIP_CONN_TYPE_UNSUPPORTED, p, server, policy);
             break;
     }
 }

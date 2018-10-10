@@ -38,7 +38,6 @@ namespace knxnetip
             if ((payload_length != 0) and
                 (payload_length - offset) < (length ? sizeof(T) : length))
             {
-                /*FIXME: alert */
                 snort::DetectionEngine::queue_event(GID_KNXNETIP, KNXNETIP_PACKET_PROCESS);
             } else {
 

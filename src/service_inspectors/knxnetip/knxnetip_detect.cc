@@ -149,6 +149,7 @@ void knxnetip::detection::detect(const snort::Packet& p, knxnetip::Packet& knxp,
     {
         knxnetip_stats.illegal_group_address++;
     }
+    /* Detect valid group members */
     else if (is_illegal_individual_address(p, knxp, server, policy))
     {
         knxnetip_stats.illegal_ia++;

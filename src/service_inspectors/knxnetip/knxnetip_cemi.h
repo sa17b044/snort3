@@ -258,7 +258,7 @@ namespace knxnetip
                     add_info::RfFastAckInfo rf_fastack_info;
                     add_info::ManufacturerSpecificData manufacturer_data;
                 };
-                void load(const snort::Packet& p, int& offset);
+                void load(const snort::Packet& p, int& offset, const knxnetip::module::server& server, const knxnetip::module::policy& policy);
 
                 add_info::TypeId get_type_id() const { return static_cast<add_info::TypeId>(*type_id); }
                 uint8_t get_length() const { return *length; }
@@ -599,7 +599,7 @@ namespace knxnetip
             public:
                 APDU apdu;
 
-                void load(const snort::Packet& p, int& offset);
+                void load(const snort::Packet& p, int& offset, const knxnetip::module::server& server, const knxnetip::module::policy& policy);
 
                 uint8_t get_info_length() const { return *information_length; }
             };
@@ -611,7 +611,7 @@ namespace knxnetip
             public:
                 APDU apdu;
 
-                void load(const snort::Packet& p, int& offset);
+                void load(const snort::Packet& p, int& offset, const knxnetip::module::server& server, const knxnetip::module::policy& policy);
 
                 uint8_t get_info_length() const { return *information_length; }
                 uint8_t get_tpci() const { return ((*tpci) & 0xfc) >> 2;}
@@ -630,7 +630,7 @@ namespace knxnetip
                 public:
                     NPDU npdu;
 
-                    void load(const snort::Packet& p, int& offset);
+                    void load(const snort::Packet& p, int& offset, const knxnetip::module::server& server, const knxnetip::module::policy& policy);
 
                     uint8_t get_ctrl1() const { return *control_field_1; }
                     uint8_t get_ctrl2() const { return *control_field_2; }
@@ -679,7 +679,7 @@ namespace knxnetip
                     datalink::Raw raw;
                 };
 
-                void load(const snort::Packet& p, int& offset, MessageCode mc);
+                void load(const snort::Packet& p, int& offset, MessageCode mc, const knxnetip::module::server& server, const knxnetip::module::policy& policy);
             };
 
             /* Transport */
@@ -690,7 +690,7 @@ namespace knxnetip
             public:
                 TPDU tpdu;
 
-                void load(const snort::Packet& p, int& offset);
+                void load(const snort::Packet& p, int& offset, const knxnetip::module::server& server, const knxnetip::module::policy& policy);
             };
 
             /* Device Management */
@@ -744,7 +744,7 @@ namespace knxnetip
                 const uint8_t* data;
                 uint8_t length;
 
-                void load(const snort::Packet& p, int& offset, MessageCode mc, uint16_t body_length);
+                void load(const snort::Packet& p, int& offset, MessageCode mc, uint16_t body_length, const knxnetip::module::server& server, const knxnetip::module::policy& policy);
             };
 
         }
@@ -762,7 +762,7 @@ namespace knxnetip
                 cemi::DeviceManagement device_mgmt;
             };
 
-            void load(const snort::Packet& p, int& offset, uint16_t body_length);
+            void load(const snort::Packet& p, int& offset, uint16_t body_length, const knxnetip::module::server& server, const knxnetip::module::policy& policy);
 
             knxnetip::packet::cemi::MessageCode get_message_code() const { return static_cast<const knxnetip::packet::cemi::MessageCode>(*message_code); }
             uint8_t get_additional_info_length() const { return *additional_info_length; }
