@@ -98,7 +98,7 @@ namespace knxnetip {
 #define KNXNETIP_INVALID_GROUP_ADDR_STR "illegal group address"
 #define KNXNETIP_INVALID_GROUP_ADDR_STR_PAR "illegal group address: <em>%u/%u/%u</em> or <em>%u/%u</em>"
 #define KNXNETIP_INVALID_INDIV_ADDR_STR "illegal individual address"
-#define KNXNETIP_INVALID_INDIV_ADDR_STR_PAR "illegal individual address <em>%u.%u.%u</em> (<em>%s</em>: group %u/%u/%u or %u/%u, members: %s)"
+#define KNXNETIP_INVALID_INDIV_ADDR_STR_PAR "illegal individual address <em>%u.%u.%u</em> (<em>%s</em>, group: %u/%u/%u or %u/%u, members: %s)"
 #define KNXNETIP_GRPADDR_MAX_STR "value out of range (max)"
 #define KNXNETIP_GRPADDR_MAX_STR_PAR "value out of range (max): <em>%s %s</em> (Maximum: <em>%s %s</em>)"
 #define KNXNETIP_GRPADDR_MIN_STR "value out of range (min)"
