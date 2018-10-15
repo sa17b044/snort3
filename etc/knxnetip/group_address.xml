@@ -45,7 +45,7 @@
   <GroupAddress Name="RaumA - Sollwert Status Kühlen" Address="3/0/4" DPTs="DPST-9-1" />
   <GroupAddress Name="RaumA - Stellgröße Heizen" Address="3/0/5" DPTs="DPST-5-1" />
   <GroupAddress Name="RaumA - Stellgröße Kühlen" Address="3/0/6" DPTs="DPST-5-1" />
-  <GroupAddress Name="RaumB - Temperatur Ist" Address="3/1/0" DPTs="DPST-9-1" max="30.0" min="-10.4" ia="7.6.5,7.6.6,7.6.7"/>
+  <GroupAddress Name="RaumB - Temperatur Ist" Address="3/1/0" DPTs="DPST-9-1" max="32.75" min="12.5" ia="7.6.4,7.6.5,7.6.6,7.6.7"/>
   <GroupAddress Name="RaumB - Sollwertverschiebung" Address="3/1/1" />
   <GroupAddress Name="RaumB - Sollwert Status" Address="3/1/2" DPTs="DPST-9-1" />
   <GroupAddress Name="RaumB - Stellgröße Heizen" Address="3/1/3" DPTs="DPST-5-1" />
