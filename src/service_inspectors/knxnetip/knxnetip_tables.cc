@@ -37,15 +37,15 @@ const snort::Parameter knxnetip::module::server_params[] =
 
 const Parameter knxnetip::module::policy_params[] =
 {
-    {"individual_addressing",Parameter::PT_BOOL, nullptr, "false", "individual addressing detection"},
     {"inspection", Parameter::PT_BOOL, nullptr, "true", "protocol inspection"},
+    {"detection", Parameter::PT_BOOL, nullptr, "false", "anomaly detection"},
+    {"individual_addressing",Parameter::PT_BOOL, nullptr, "false", "individual addressing detection"},
     {"services", Parameter::PT_STRING, nullptr, nullptr, "service detection"},
     {"app_services", Parameter::PT_STRING, nullptr, nullptr, "application layer service detection"},
-    {"header", Parameter::PT_BOOL, nullptr, "false", "print header with alert"},
-    {"payload", Parameter::PT_BOOL, nullptr, "false", "print payload with alert"},
-    {"detection", Parameter::PT_BOOL, nullptr, "false", "protocol detection"},
     {"group_address_level", Parameter::PT_INT, "2:3", "3",  "group address level (2/3)"},
     {"group_address_file", Parameter::PT_STRING, nullptr, nullptr, "group address file"},
+    {"header", Parameter::PT_BOOL, nullptr, "false", "print header with alert"},
+    {"payload", Parameter::PT_BOOL, nullptr, "false", "print payload with alert"},
     { nullptr, Parameter::PT_MAX, nullptr, nullptr, nullptr }
 };
 
@@ -86,16 +86,16 @@ const RuleMap knxnetip::module::rules[] = {
     { KNXNETIP_DIB_UNSUPPORTED, KNXNETIP_DIB_UNSUPPORTED_STR },
     { KNXNETIP_CONN_TYPE_UNSUPPORTED, KNXNETIP_CONN_TYPE_UNSUPPORTED_STR },
     { KNXNETIP_SELECTOR_UNSUPPORTED, KNXNETIP_SELECTOR_UNSUPPORTED_STR },
-    /* Anomaly Detection */
-    { KNXNETIP_INDIV_ADDR, KNXNETIP_INDIV_ADDR_STR },
-    { KNXNETIP_INVALID_INDIV_ADDR, KNXNETIP_INVALID_INDIV_ADDR_STR },
-    { KNXNETIP_INVALID_GROUP_ADDR, KNXNETIP_INVALID_GROUP_ADDR_STR },
-    { KNXNETIP_SRVC, KNXNETIP_SRVC_STR },
-    { KNXNETIP_APP_SRVC, KNXNETIP_APP_SRVC_STR },
     { KNXNETIP_APP_SRVC_UNSUPPORTED, KNXNETIP_APP_SRVC_UNSUPPORTED_STR },
     { KNXNETIP_RESERVED_FIELD_W_DATA, KNXNETIP_RESERVED_FIELD_W_DATA_STR },
     { KNXNETIP_CEMI_SRVC_UNSUPPORTED, KNXNETIP_CEMI_SRVC_UNSUPPORTED_STR },
     { KNXNETIP_CEMI_PROCESSING_ERROR, KNXNETIP_CEMI_PROCESSING_ERROR_STR },
+    /* Anomaly Detection */
+    { KNXNETIP_INDIV_ADDR, KNXNETIP_INDIV_ADDR_STR },
+    { KNXNETIP_SRVC, KNXNETIP_SRVC_STR },
+    { KNXNETIP_APP_SRVC, KNXNETIP_APP_SRVC_STR },
+    { KNXNETIP_INVALID_GROUP_ADDR, KNXNETIP_INVALID_GROUP_ADDR_STR },
+    { KNXNETIP_INVALID_INDIV_ADDR, KNXNETIP_INVALID_INDIV_ADDR_STR },
     { KNXNETIP_GRPADDR_MAX, KNXNETIP_GRPADDR_MAX_STR },
     { KNXNETIP_GRPADDR_MIN, KNXNETIP_GRPADDR_MIN_STR },
 //    { KNXNETIP_HEAD
